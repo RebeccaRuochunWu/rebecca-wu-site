@@ -49,7 +49,7 @@ git push -u origin main
 Search `index.html` for `[` to find placeholders:
 
 - Eye contact correction: your role, the key call you made, the outcome
-- Resume, LinkedIn and Instagram links (they point to `#` for now)
+- Instagram link (points to `#` for now)
 
 ## Editing tips
 
