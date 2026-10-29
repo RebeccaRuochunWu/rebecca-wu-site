@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<title>Mapier Reply Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&family=Playfair+Display:wght@500&display=swap">
+<style>
+/* Layout: mapier.ai shell. White ground, serif wordmark left, blue capsule nav centered, soft grey 28px cards, pill buttons; single light theme to match the brand site */
+:root{
+  --ground:#FFFFFF; --sunken:#EBEBEB; --raised:#F5F5F5; --ink:#2B2B2B; --ink-2:#5E5E5E; --ink-3:#6A6A6A; --hair:#DADADA;
+  --theme:#1076C2; --theme-hover:#0D64A6; --theme-soft:#E7F1F9; --theme-deep:#0D5C96;
+  --bub-gray:#E9E9EB; --bub-gray-fg:#000000; --bub-top:#56C4FF; --bub-bottom:#0B84FF;
+  --good:#2E9D57; --bad:#CF372D; --bad-soft:#FDECEB; --neutral:#B4B4B4;
+  --font-brand:'Playfair Display', ui-serif, Georgia, serif;
+  --font-display:'Google Sans Flex','Google Sans','Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-body:'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --r-card:28px; --r-inner:16px; --r-pill:9999px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--ground); color:var(--ink); font-family:var(--font-body); font-size:15px; line-height:1.5; letter-spacing:-0.004em}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--theme); outline-offset:2px}
+h1,h2,h3{font-family:var(--font-display); font-weight:500; margin:0; text-wrap:balance; color:var(--ink)}
+h1{font-size:clamp(30px,4vw,40px); letter-spacing:-0.03em; line-height:1.1}
+h2{font-size:22px; letter-spacing:-0.018em}
+h3{font-size:16px; letter-spacing:-0.01em}
+.num{font-family:var(--font-display); font-variant-numeric:tabular-nums; font-weight:500}
+.muted{color:var(--ink-2)}
+.eyebrow{font-size:12px; letter-spacing:.04em; color:var(--ink-2); font-weight:500}
+
+/* header */
+.app{min-height:100%; display:flex; flex-direction:column}
+.top{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:16px; padding:20px clamp(20px,3.2vw,48px); position:sticky; top:env(safe-area-inset-top,0px); background:color-mix(in srgb, var(--ground) 92%, transparent); backdrop-filter:blur(8px); z-index:5}
+.brand{display:flex; align-items:baseline; gap:10px}
+.wordmark{font-family:var(--font-brand); font-size:30px; letter-spacing:-0.02em; color:var(--ink); line-height:1}
+.product{font-size:12px; font-weight:500; color:var(--theme); background:var(--theme-soft); padding:3px 10px; border-radius:var(--r-pill)}
+.nav{display:flex; gap:4px; background:var(--theme); padding:6px; border-radius:var(--r-pill); box-shadow:0 1px 2px rgba(20,18,15,.16)}
+.nav button{all:unset; cursor:pointer; padding:7px 18px; border-radius:var(--r-pill); color:#fff; font-family:var(--font-display); font-weight:500; font-size:15px}
+.nav button[aria-current="page"]{background:#fff; color:var(--theme)}
+.nav button:focus-visible{outline:2px solid #fff; outline-offset:1px}
+.acct{justify-self:end; display:flex; align-items:center; gap:12px; font-family:var(--font-display); font-weight:500; color:var(--theme-deep)}
+.avatar{width:36px; height:36px; border-radius:50%; background:var(--theme); color:#fff; display:grid; place-items:center; font-size:13px}
+
+.main{padding-block:24px 80px; padding-inline:clamp(20px,3.2vw,48px); min-width:0; flex:1}
+.view{max-width:1120px; margin:0 auto; display:flex; flex-direction:column; gap:24px}
+.row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+.spread{justify-content:space-between}
+
+.btn{border:0; background:var(--sunken); color:var(--ink); padding:9px 18px; border-radius:var(--r-pill); font-family:var(--font-display); font-weight:500; font-size:15px}
+.btn:hover{background:#E0E0E0}
+.btn.primary{background:var(--theme); color:#fff}
+.btn.primary:hover{background:var(--theme-hover)}
+.btn[disabled]{opacity:.4; cursor:not-allowed}
+.btn.ghost{background:transparent; color:var(--theme-deep); padding-inline:0}
+.btn.ghost:hover{text-decoration:underline}
+
+.panel{background:var(--sunken); border-radius:var(--r-card); padding:28px}
+.pill{display:inline-flex; align-items:center; gap:6px; padding:3px 11px; border-radius:var(--r-pill); font-size:12px; font-weight:500; background:var(--sunken); color:var(--ink-2)}
+.pill::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor}
+.pill.live{color:var(--good); background:#E5F4EA}
+.pill.done{color:var(--theme); background:var(--theme-soft)}
+
+/* surveys table */
+.tablewrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse}
+th{text-align:left; font-size:12px; color:var(--ink-2); font-weight:500; padding:10px 14px; border-bottom:1px solid var(--hair)}
+td{padding:16px 14px; border-bottom:1px solid var(--hair); white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--raised)}
+td .name{font-weight:500}
+
+/* templates */
+.tpl-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px}
+.tpl{all:unset; cursor:pointer; border-radius:24px; padding:22px; background:var(--sunken); display:grid; gap:6px; transition:background .15s}
+.tpl:hover{background:var(--theme-soft)}
+.tpl:focus-visible{outline:2px solid var(--theme)}
+.tpl b{font-family:var(--font-display); font-weight:500; font-size:18px}
+
+/* stepper */
+.stepper{display:flex; gap:4px; flex-wrap:wrap; background:var(--sunken); padding:5px; border-radius:var(--r-pill)}
+.step{all:unset; display:flex; align-items:center; gap:8px; padding:6px 14px 6px 6px; border-radius:var(--r-pill); color:var(--ink-2); font-family:var(--font-display); font-weight:500; font-size:14px; cursor:default}
+.step .dot{width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:12px; background:#fff; color:var(--ink-2)}
+.step.on{color:var(--ink); background:#fff; box-shadow:0 1px 2px rgba(20,18,15,.12)}
+.step.on .dot{background:var(--theme); color:#fff}
+.step.done{cursor:pointer; color:var(--ink)}
+.step.done .dot{background:var(--theme-soft); color:var(--theme)}
+
+/* builder */
+.split{display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:28px; align-items:start}
+.qcard{border-radius:24px; background:var(--sunken); padding:20px; display:grid; gap:12px}
+.qhead{display:flex; gap:10px; align-items:center}
+.qtag{font-family:var(--font-display); font-weight:500; font-size:13px; padding:3px 10px; border-radius:var(--r-pill); background:var(--theme); color:#fff}
+input[type=text],input[type=number],select{border:1px solid transparent; background:#fff; border-radius:12px; padding:10px 12px; width:100%; min-width:0}
+input[type=text]:hover,input[type=number]:hover,select:hover{border-color:var(--hair)}
+select{width:auto; border-radius:var(--r-pill); padding-inline:14px}
+.opt{display:flex; gap:8px; align-items:center}
+.opt .key{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); width:20px}
+.iconbtn{all:unset; cursor:pointer; color:var(--ink-3); padding:4px 8px; border-radius:var(--r-pill); line-height:1; font-size:13px}
+.iconbtn:hover{color:var(--bad); background:var(--bad-soft)}
+.iconbtn[disabled]{opacity:.35; pointer-events:none}
+.iconbtn:focus-visible{outline:2px solid var(--theme)}
+.hint{font-size:13px; color:var(--ink-2)}
+.warn-text{color:var(--bad); font-size:14px}
+
+/* phone */
+.phone{position:sticky; top:110px; border-radius:44px; padding:10px; background:#1D1B20; box-shadow:0 32px 64px -12px rgba(8,22,42,.35), 0 12px 28px -6px rgba(8,22,42,.25)}
+.screen{border-radius:34px; background:#fff; height:580px; overflow-y:auto; padding:18px 12px; display:flex; flex-direction:column; gap:6px}
+.screen .who{text-align:center; font-size:12px; color:var(--ink-2); margin-bottom:8px}
+.screen .who b{display:block; color:var(--ink); font-size:13px; font-weight:600}
+.bub{max-width:80%; padding:7px 12px; border-radius:18px; font-size:13.5px; line-height:1.35; white-space:pre-line; overflow-wrap:anywhere; font-family:-apple-system, 'SF Pro Text', var(--font-body)}
+.bub.in{background:var(--bub-gray); color:var(--bub-gray-fg); align-self:flex-start; border-bottom-left-radius:6px}
+.bub.out{background:linear-gradient(180deg,var(--bub-top) -60%,var(--bub-bottom) 100%); color:#fff; align-self:flex-end; border-bottom-right-radius:6px}
+.phone-cap{text-align:center; font-size:13px; color:var(--ink-2); margin-top:12px}
+
+/* audience */
+.fields{display:grid; gap:24px}
+.field{display:grid; gap:8px}
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chip{border:0; background:#fff; padding:7px 15px; border-radius:var(--r-pill); font-family:var(--font-display); font-weight:500}
+.chip[aria-pressed="true"]{background:var(--theme); color:#fff}
+.stat{display:grid; gap:2px}
+.stat .num{font-size:32px; letter-spacing:-0.02em}
+.switch{display:flex; align-items:flex-start; gap:10px}
+.switch input{width:18px; height:18px; accent-color:var(--theme); margin-top:2px}
+.checks{display:grid; gap:6px}
+.checks label{display:flex; gap:8px; align-items:center}
+.checks input{accent-color:var(--theme)}
+
+/* checkout */
+.lines{display:grid; gap:12px}
+.line{display:flex; justify-content:space-between; gap:12px}
+.line.total{border-top:1px solid var(--hair); padding-top:14px; font-weight:500; font-size:18px; font-family:var(--font-display)}
+.stepperinput{display:flex; align-items:center; gap:8px}
+.stepperinput input{width:110px; text-align:center}
+.card-mock{display:flex; justify-content:space-between; align-items:center; border-radius:var(--r-inner); padding:14px 16px; background:#fff}
+
+/* review overlay */
+.overlay{position:fixed; inset:0; background:rgba(29,27,32,.35); backdrop-filter:blur(4px); display:grid; place-items:center; padding:16px; z-index:10}
+.overlay .panel{background:#fff; width:min(440px,100%); display:grid; gap:16px; box-shadow:0 32px 64px -12px rgba(8,22,42,.4)}
+.check-row{display:flex; gap:10px; align-items:center}
+.tick{width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:12px; background:var(--sunken); flex:none}
+.tick.ok{background:var(--theme); color:#fff}
+.tick.run{background:transparent; border:2px solid var(--theme); border-top-color:transparent; animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.tick.run{animation:none}}
+
+/* results */
+.progress{height:8px; border-radius:var(--r-pill); background:#fff; overflow:hidden}
+.progress > i{display:block; height:100%; background:var(--theme); border-radius:var(--r-pill); transition:width .6s ease}
+@media (prefers-reduced-motion: reduce){.progress > i{transition:none}}
+.ai{background:var(--theme); color:#fff; border-radius:var(--r-card); padding:28px; display:grid; gap:12px}
+.ai h2{color:#fff}
+.ai ul{margin:0; padding-left:20px; display:grid; gap:8px; font-size:16px}
+.ai .hint, .ai .muted{color:rgba(255,255,255,.8)}
+.badge{font-size:11px; padding:3px 10px; border-radius:var(--r-pill); background:var(--theme-soft); color:var(--theme); font-weight:600}
+.ai .badge{background:rgba(255,255,255,.18); color:#fff}
+.qnav{display:flex; gap:4px; flex-wrap:wrap; background:#fff; padding:4px; border-radius:var(--r-pill)}
+.qnav button{border:0; background:transparent; border-radius:var(--r-pill); padding:5px 12px; font-family:var(--font-display); font-weight:500; font-size:13px; color:var(--ink-2)}
+.qnav button[aria-current="true"]{background:var(--theme); color:#fff}
+.qbody{display:grid; grid-template-columns:300px minmax(0,1fr); gap:28px; align-items:start}
+.insight{background:#fff; border-radius:var(--r-inner); padding:18px 20px; display:grid; gap:8px}
+.bars{display:grid; gap:14px}
+.bar-row{display:grid; gap:5px}
+.bar-row .lab{display:flex; justify-content:space-between; gap:12px; font-size:14px}
+.bar-track{height:14px; background:#fff; border-radius:var(--r-pill); overflow:hidden; display:flex}
+.bar-track i{display:block; height:100%; transition:width .6s ease}
+@media (prefers-reduced-motion: reduce){.bar-track i{transition:none}}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--ink-2)}
+.legend span{display:flex; align-items:center; gap:6px}
+.legend i{width:9px; height:9px; border-radius:50%; display:inline-block}
+.quote{font-size:14px; border-left:2px solid var(--hair); padding-left:10px; color:var(--ink-2)}
+.bignum{font-family:var(--font-display); font-size:44px; font-weight:500; letter-spacing:-0.03em; line-height:1}
+.empty-note{padding:20px; background:#fff; border-radius:var(--r-inner); color:var(--ink-2)}
+
+.toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); background:#1D1B20; color:#fff; padding:11px 18px; border-radius:var(--r-pill); font-size:14px; z-index:20}
+.proto{font-size:11px; color:var(--theme); background:var(--theme-soft); border-radius:var(--r-pill); padding:2px 9px; font-weight:500}
+
+@media (max-width: 960px){
+  .split{grid-template-columns:minmax(0,1fr)}
+  .phone{position:static; max-width:340px; margin:0 auto; width:100%}
+  .qbody{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width: 760px){
+  .top{grid-template-columns:1fr auto; row-gap:12px}
+  .nav{grid-column:1 / -1; grid-row:2; justify-self:start}
+  .acct span:first-child{display:none}
+  .panel{padding:20px; border-radius:22px}
+}
+
+/* v3 additions: builder panel, billing */
+.view > .row select, .field > input[type=text]#survey-name{background:var(--sunken)}
+.balance-pill{all:unset; cursor:pointer; font-family:var(--font-display); font-weight:500; font-size:14px; color:var(--theme-deep); background:var(--theme-soft); padding:6px 14px; border-radius:var(--r-pill)}
+.balance-pill:hover{background:#D9E9F5}
+.balance-pill:focus-visible{outline:2px solid var(--theme)}
+.builder{display:grid; grid-template-columns:290px minmax(0,1fr) 300px; gap:24px; align-items:start}
+.addpanel{position:sticky; top:110px; background:var(--sunken); border-radius:24px; padding:16px; display:grid; gap:14px}
+.tabs{display:flex; gap:4px; background:#fff; padding:4px; border-radius:var(--r-pill)}
+.tabs button{flex:1; border:0; background:transparent; border-radius:var(--r-pill); padding:7px 6px; font-family:var(--font-display); font-weight:500; font-size:13px; color:var(--ink-2); white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--theme); color:#fff}
+.elems{display:grid; gap:8px; max-height:520px; overflow-y:auto}
+.elem{background:#fff; border-radius:var(--r-inner); padding:12px 14px; display:grid; gap:4px}
+.elem .row{gap:8px}
+.elem b{font-weight:500; flex:1}
+.elem .tip{font-size:12px; color:var(--theme-deep)}
+.mini{border:0; background:var(--theme-soft); color:var(--theme); border-radius:var(--r-pill); padding:4px 12px; font-family:var(--font-display); font-weight:500; font-size:13px}
+.mini:hover{background:#D9E9F5}
+.mini[disabled]{opacity:.4; cursor:not-allowed}
+textarea{border:1px solid transparent; background:#fff; border-radius:12px; padding:10px 12px; width:100%; min-height:130px; resize:vertical; font:inherit; color:inherit}
+textarea:hover{border-color:var(--hair)}
+.parsed{display:grid; gap:6px}
+.parsed .p{background:#fff; border-radius:12px; padding:8px 12px; display:flex; gap:8px; align-items:baseline; font-size:14px}
+.parsed .p.over{opacity:.45}
+.typetag{font-size:11px; padding:2px 8px; border-radius:var(--r-pill); background:var(--sunken); color:var(--ink-2); white-space:nowrap}
+.suggest{display:flex; flex-wrap:wrap; gap:6px}
+.suggest button{border:0; background:#fff; border-radius:var(--r-pill); padding:5px 11px; font-size:12.5px; color:var(--ink-2)}
+.suggest button:hover{color:var(--ink)}
+.radio{display:flex; gap:14px; font-size:14px}
+.radio label{display:flex; gap:6px; align-items:center}
+.radio input{accent-color:var(--theme)}
+.canvas-empty{border:2px dashed var(--hair); border-radius:24px; padding:40px 24px; text-align:center; color:var(--ink-2)}
+.aitag{font-size:11px; padding:2px 8px; border-radius:var(--r-pill); background:var(--theme-soft); color:var(--theme); font-weight:600}
+.statgrid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
+.statcard{background:var(--sunken); border-radius:24px; padding:22px; display:grid; gap:4px}
+.statcard .num{font-size:30px; letter-spacing:-0.02em}
+.amt-pos{color:var(--good)}
+.amt-neg{color:var(--ink)}
+.topup{display:grid; gap:12px; background:#fff; border-radius:var(--r-inner); padding:16px}
+.notice{background:var(--theme-soft); color:var(--theme-deep); border-radius:var(--r-inner); padding:12px 14px; font-size:14px}
+.reported{color:var(--ink-3); font-size:13px}
+@media (max-width: 1180px){ .builder{grid-template-columns:270px minmax(0,1fr)} .builder > .phonecol{grid-column:1 / -1} .phone{position:static; max-width:340px; margin:0 auto} }
+@media (max-width: 760px){ .builder{grid-template-columns:minmax(0,1fr)} .addpanel{position:static} .statgrid{grid-template-columns:minmax(0,1fr)} .balance-pill{display:none} }
+.settings{display:grid; grid-template-columns:200px minmax(0,1fr); gap:28px; align-items:start}
+.setnav{position:sticky; top:110px; display:grid; gap:2px}
+.setnav button{all:unset; cursor:pointer; padding:8px 14px; border-radius:var(--r-pill); color:var(--ink-2); font-family:var(--font-display); font-weight:500}
+.setnav button:hover{background:var(--sunken); color:var(--ink)}
+.setnav button:focus-visible{outline:2px solid var(--theme)}
+@media (max-width: 760px){ .settings{grid-template-columns:minmax(0,1fr)} .setnav{position:static; display:flex; flex-wrap:wrap} }
+.card-mock{flex-wrap:wrap; gap:8px}
+.smart-result{display:grid; gap:10px}
+.fchip{background:#fff; border-radius:var(--r-pill); padding:6px 12px; font-size:13.5px}
+.fchip b{font-weight:500}
+.smartbox{background:linear-gradient(180deg, var(--theme-soft), var(--sunken))}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="wordmark">mapier</span><span class="product">Reply</span></div>
+    <nav class="nav" aria-label="Main">
+      <button id="nav-surveys" aria-current="page">Surveys</button>
+      <button id="nav-billing">Billing</button>
+      <button id="nav-settings">Settings</button>
+    </nav>
+    <div class="acct"><button class="balance-pill" id="bal-pill"></button><span class="avatar" aria-label="Priya Shah, Acme Snacks">PS</span></div>
+  </header>
+  <main class="main" id="main"></main>
+</div>
+<div id="overlay-root"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt$ = n => (n<0?'−':'') + '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtN = n => n.toLocaleString('en-US');
+const clone = o => JSON.parse(JSON.stringify(o));
+function hash(s){let h=2166136261; for(const c of s){h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return (h>>>0);}
+
+/* ---------- billing model (placeholders, see PRD Billing & pricing) ---------- */
+const FEE = 0.40, SCREEN_PAY = 0.25, MIN_TOPUP = 50;
+const minReward = qs => 1.00 + 0.25*Math.max(0, qs.length-3);
+const wallet = {available:187.00, reserved:287.70, spentMonth:475.30,
+  methods:[{id:'v',brand:'Visa',last4:'4242',exp:'08/28',main:true},{id:'m',brand:'Mastercard',last4:'5100',exp:'10/26',backup:true,expSoon:true}],
+  autoTopup:{on:false, below:50, amt:200},
+  details:{address:'Acme Snacks Inc., 500 Howard St, San Francisco, CA 94105', tax:'', email:'billing@acmesnacks.com'}};
+const settings = {name:'Priya Shah', email:'priya@acmesnacks.com', signin:'google',
+  notify:{launched:true, filled:true, slow:true, lowbal:true, weekly:false},
+  defaults:{rewardBump:0, capPct:0.5, reminder:'1h', runDays:7}, sender:'mapier', retention:'365',
+  get(p){ return p.split('.').reduce((o,k)=>o[k], this); },
+  set(p,v){ const ks=p.split('.'); let o=this; ks.slice(0,-1).forEach(k=>o=o[k]); o[ks[ks.length-1]]=v; }};
+function senderName(){ return settings.sender==='branded'?'Mapier Research for Acme Snacks':'Mapier Research'; }
+function mainCard(){ const m=wallet.methods.find(x=>x.main); return m.brand+(m.last4?' ending '+m.last4:''); }
+const txns = [
+  {date:'Oct 8', desc:'Reserved for launch', survey:'Spicy mango chip concept', amt:-472.50},
+  {date:'Oct 8', desc:'Top-up', survey:'—', amt:450.00, receipt:true},
+  {date:'Oct 7', desc:'Released: unused screen-out slots', survey:'Meal kit name test', amt:24.50},
+  {date:'Oct 7', desc:'Reserved for launch', survey:'Meal kit name test', amt:-315.00},
+  {date:'Oct 6', desc:'Top-up', survey:'—', amt:500.00, receipt:true}
+];
+
+const TYPES = {single:'Single choice', multi:'Multi-select', rating:'Rating 1–5', nps:'NPS 0–10', yesno:'Yes / No', number:'Number', text:'Short text'};
+const AGES = ['18–24','25–34','35–44','45–54','55+'];
+const AGE_SHARE = [0.16,0.24,0.22,0.19,0.19];
+const REGIONS = {'All US':1,'Northeast':0.18,'Midwest':0.21,'South':0.38,'West':0.23};
+const PANEL = 52400, MAXQ = Infinity, MAXOPT = 6, LONG_SURVEY = 8;
+
+const ELEMENTS = [
+  {id:'gender', label:'Gender', profile:true, q:{type:'single', text:'Which best describes your gender?', options:['Woman','Man','Non-binary','Prefer not to say']}},
+  {id:'age', label:'Age range', profile:true, q:{type:'single', text:'What is your age range?', options:['18–24','25–34','35–44','45–54','55+']}},
+  {id:'region', label:'US region', profile:true, q:{type:'single', text:'Which part of the US do you live in?', options:['Northeast','Midwest','South','West']}},
+  {id:'zip', label:'ZIP code', q:{type:'number', text:'What is your ZIP code?'}},
+  {id:'income', label:'Household income', q:{type:'single', text:'What is your household income?', options:['Under $50k','$50k–$99k','$100k–$149k','$150k or more','Prefer not to say']}},
+  {id:'employment', label:'Employment status', q:{type:'single', text:'What is your employment status?', options:['Full-time','Part-time','Self-employed','Student','Not working']}},
+  {id:'kids', label:'Kids at home', q:{type:'yesno', text:'Do you have kids under 18 at home?'}},
+  {id:'shop', label:'Online shopping', q:{type:'single', text:'How often do you shop online?', options:['Weekly or more','1–3 times a month','Rarely']}}
+];
+
+const TEMPLATES = [
+  {id:'name', title:'Name test', desc:'Pick the stronger of 2–4 names.', name:'Meal kit name test', qs:[
+    {type:'single', text:'How often do you order takeout?', options:['Weekly or more','1–3 times a month','Rarely']},
+    {type:'single', text:'Which name do you like more for a meal kit?', options:['FreshBox','Plated Daily']},
+    {type:'text', text:'In a few words, why?'}]},
+  {id:'concept', title:'Concept test', desc:'Gauge appeal and purchase intent.', name:'New flavor concept', qs:[
+    {type:'rating', text:'How appealing is a spicy mango chip?'},
+    {type:'single', text:'How likely are you to buy it?', options:['Definitely','Probably','Not sure','Probably not']},
+    {type:'text', text:'What would make it better?'}]},
+  {id:'nps', title:'NPS', desc:'Measure loyalty and the reason behind it.', name:'Q4 NPS pulse', qs:[
+    {type:'nps', text:'How likely are you to recommend Acme Snacks to a friend?'},
+    {type:'text', text:'What’s the main reason for your score?'}]},
+  {id:'pricing', title:'Pricing check', desc:'Find what people expect to pay.', name:'Subscription price check', qs:[
+    {type:'single', text:'At $12 a month, would you subscribe?', options:['Definitely','Probably','Not sure','Probably not','Definitely not']},
+    {type:'number', text:'What’s the most you’d pay per month, in dollars?'}]},
+  {id:'message', title:'Message test', desc:'See which headline lands.', name:'Homepage headline test', qs:[
+    {type:'single', text:'Which headline makes you want to learn more?', options:['Real food, ready in 10','Dinner, solved','Cook less, eat better']},
+    {type:'text', text:'What made you pick it?'}]}
+];
+const AI_ALTS = {
+  single:['Which of these fits you best?','Which option would you pick?'],
+  text:['What’s the main reason?','Tell us why in a few words.'],
+  rating:['How much do you like this idea, from 1 to 5?'], nps:['How likely are you to recommend us to a friend?'],
+  yesno:['Would you try this?'], number:['About how many dollars would you spend?'], multi:['Which of these apply to you?']
+};
+
+/* ---------- sample surveys ---------- */
+const surveys = [
+  {id:'s1', name:'Meal kit name test', status:'done', n:200, got:200, reward:1.00, cap:100, reserve:315.00, audience:'US · 25–44', updated:'Oct 7', fillTime:'52 min',
+   qs:[
+     {type:'single', text:'How often do you order takeout?', options:['Weekly or more','1–3 times a month','Rarely'], w:[0.41,0.39,0.20]},
+     {type:'single', text:'Which name do you like more for a meal kit?', options:['FreshBox','Plated Daily'], w:[0.38,0.62]},
+     {type:'text', text:'In a few words, why?', topics:[['Sounds like real food',60,6,2],['Sounds fresh or healthy',40,5,2],['Sounds cheap or generic',2,6,25],['Hard to remember',0,5,16]],
+      quotes:['“Plated Daily sounds like an actual dinner.”','“FreshBox feels like a diet product.”'],
+      answers:['sounds like real food','FreshBox feels like a diet thing','easier to remember','Plated sounds fancier','sounds healthy']}],
+   insights:{0:'Takeout is a habit for most: 80% order at least monthly.', 1:'Plated Daily wins 62% to 38%. The lead is strongest among weekly takeout orderers (71%).', 2:'“Real food” is the main reason Plated Daily wins. FreshBox reads as cheap or generic, the top negative theme.'},
+   summary:['62% prefer Plated Daily, and it leads in every age group','Weekly takeout orderers lean hardest toward Plated Daily (71%)','Top reason: it “sounds like real food” (34% of open answers)']},
+  {id:'s2', name:'Spicy mango chip concept', status:'live', n:300, got:132, reward:1.00, cap:150, reserve:472.50, audience:'US · 18–34', updated:'Today', qs:clone(TEMPLATES[1].qs)},
+  {id:'s3', name:'Q4 NPS pulse', status:'draft', n:200, got:0, audience:'—', updated:'Oct 2', qs:clone(TEMPLATES[2].qs)}
+];
+
+const state = {smart:{text:'',busy:false,result:null}, moreOpen:false, view:'home', draft:null, step:1, tab:'elements', resultsId:null, qi:0, filter:{age:'All ages', gender:'Everyone', region:'All US'},
+  importText:'', parsed:null, aiGoal:'', aiMode:'replace', aiBusy:false, topupOpen:false, topupAmt:100, reported:{}};
+let ticker = null;
+
+function toast(msg){const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,2600);}
+function go(view){ state.view=view; if(ticker && view!=='results'){clearInterval(ticker); ticker=null;} render(); window.scrollTo(0,0); }
+
+/* ---------- HOME ---------- */
+function viewHome(){
+  const rows = surveys.map(s=>{
+    const pill = s.status==='live'?'<span class="pill live">Live</span>':s.status==='done'?'<span class="pill done">Completed</span>':'<span class="pill">Draft</span>';
+    return `<tr data-id="${s.id}" tabindex="0">
+      <td><div class="name">${esc(s.name)}</div><div class="muted" style="font-size:12px">${s.qs.length} questions</div></td>
+      <td>${pill}</td>
+      <td class="num">${s.status==='draft'?'—':fmtN(s.got)+' / '+fmtN(s.n)}</td>
+      <td>${esc(s.audience)}</td>
+      <td class="num">${s.reserve?fmt$(s.reserve):'—'}</td>
+      <td class="muted">${esc(s.updated)}</td></tr>`;}).join('');
+  return `<div class="view">
+    <div class="row spread"><div><h1>Surveys</h1><p class="muted" style="margin:6px 0 0">Answered over iMessage by real people, usually within hours.</p></div>
+    <button class="btn primary" id="new-survey">New survey</button></div>
+    <div class="panel" style="padding:8px 14px"><div class="tablewrap"><table>
+      <thead><tr><th>Survey</th><th>Status</th><th>Responses</th><th>Audience</th><th>Reserved</th><th>Updated</th></tr></thead>
+      <tbody>${rows}</tbody></table></div></div>
+    <p class="hint"><span class="proto">Prototype</span> Sample data and placeholder prices. Nothing is sent or charged.</p>
+  </div>`;
+}
+function viewTemplates(){
+  return `<div class="view">
+    <div><button class="btn ghost" id="back-home">← Surveys</button><h1 style="margin-top:8px">Start a survey</h1>
+    <p class="muted" style="margin:6px 0 0">Start blank and build with form elements, imports or AI, or start from a template.</p></div>
+    <div class="tpl-grid"><button class="tpl" data-tpl="blank" style="background:var(--theme-soft)"><b>Start blank</b><span class="muted">Open the builder with an empty survey.</span><span class="hint">Form elements · Import · Create with AI</span></button>
+    ${TEMPLATES.map(t=>`<button class="tpl" data-tpl="${t.id}"><b>${t.title}</b><span class="muted">${t.desc}</span><span class="hint">${t.qs.length} questions</span></button>`).join('')}</div>
+  </div>`;
+}
+function stepper(){
+  const steps=['Audience','Questions','Review and pay'];
+  return `<div class="stepper" role="list">${steps.map((s,i)=>{const n=i+1; const cls=n===state.step?'on':n<state.step?'done':'';
+    return `<button class="step ${cls}" role="listitem" data-step="${n}" ${n<state.step?'':'tabindex="-1"'}><span class="dot">${n<state.step?'✓':n}</span>${s}</button>`;}).join('')}</div>`;
+}
+
+/* ---------- BUILDER ---------- */
+function problems(d){
+  const p=[]; if(!d.qs.length) p.push('Add at least one question.');
+  d.qs.forEach((q,i)=>{ if(!q.text.trim()) p.push(`Q${i+1} needs question text.`);
+    if((q.type==='single'||q.type==='multi') && q.options.filter(o=>o.trim()).length<2) p.push(`Q${i+1} needs at least 2 answer options.`);});
+  return p;
+}
+function addQuestions(list, mode){
+  const d=state.draft; if(mode==='replace') d.qs=[];
+  const room=MAXQ-d.qs.length; const take=list.slice(0,Math.max(0,room)).map(clone);
+  d.qs.push(...take); return {added:take.length, skipped:list.length-take.length};
+}
+function panelElements(){
+  const full=state.draft.qs.length>=MAXQ;
+  return `<div class="elems">${ELEMENTS.map(e=>`<div class="elem"><div class="row"><b>${e.label}</b><span class="typetag">${TYPES[e.q.type]}</span>
+    <button class="mini" data-elem="${e.id}" ${full?'disabled':''} aria-label="Add ${e.label}">Add</button></div>
+    ${e.profile?'<span class="tip">Already in respondent profiles. Use it as an audience filter to save a question.</span>':''}</div>`).join('')}</div>
+    ${full?'<span class="hint">Your survey has 5 questions, the maximum.</span>':''}`;
+}
+function parseImport(txt){
+  const out=[]; const blocks=txt.split(/\n\s*\n/).map(b=>b.trim()).filter(Boolean);
+  const lines = blocks.length>1?blocks:txt.split('\n').map(l=>l.trim()).filter(Boolean).reduce((acc,l)=>{ if(/^([-*•]|\d+[).]|[A-Fa-f][).])\s+/.test(l) && acc.length) acc[acc.length-1]+='\n'+l; else acc.push(l); return acc;},[]);
+  lines.forEach(b=>{ const ls=b.split('\n').map(x=>x.trim()).filter(Boolean); const text=ls[0].replace(/^(Q?\d+[).:]\s*)/i,'');
+    const opts=ls.slice(1).map(x=>x.replace(/^([-*•]|\d+[).]|[A-Fa-f][).])\s*/,'')).filter(Boolean);
+    let type='text';
+    if(opts.length>=2) type=/all that apply|select all/i.test(text)?'multi':'single';
+    else if(/recommend|0\s*(–|-|to)\s*10/i.test(text)) type='nps';
+    else if(/1\s*(–|-|to)\s*5|rate/i.test(text)) type='rating';
+    else if(/how (many|much)|zip|\$/i.test(text)) type='number';
+    else if(/^(do|did|are|is|have|has|would|will|can)\b/i.test(text)) type='yesno';
+    const q={type,text:text.slice(0,120)}; if(type==='single'||type==='multi') q.options=opts.slice(0,MAXOPT).map(o=>o.slice(0,40));
+    out.push(q); });
+  return out;
+}
+function parseCSV(txt){
+  const rows=txt.split(/\r?\n/).filter(r=>r.trim()); if(!rows.length) return [];
+  const cells=r=>{const o=[];let cur='',q=false;for(const ch of r){if(ch==='"'){q=!q;continue;} if(ch===','&&!q){o.push(cur);cur='';} else cur+=ch;} o.push(cur); return o.map(x=>x.trim());};
+  let start=0; const h=cells(rows[0]).map(x=>x.toLowerCase()); if(h[0]==='question') start=1;
+  return rows.slice(start).map(r=>{const [text,type,opts]=cells(r); const t=Object.keys(TYPES).includes((type||'').toLowerCase())?type.toLowerCase():(opts?'single':'text');
+    const q={type:t,text:(text||'').slice(0,120)}; if(t==='single'||t==='multi') q.options=(opts||'').split('|').map(o=>o.trim().slice(0,40)).filter(Boolean).slice(0,MAXOPT); return q;}).filter(q=>q.text);
+}
+function panelImport(){
+  const p=state.parsed; const room=MAXQ-state.draft.qs.length;
+  return `<div class="field"><label class="eyebrow" for="imp-text">Paste questions</label>
+    <textarea id="imp-text" placeholder="How often do you order takeout?&#10;1) Weekly or more&#10;2) 1–3 times a month&#10;3) Rarely&#10;&#10;In a few words, why?">${esc(state.importText)}</textarea>
+    <span class="hint">One question per paragraph. Put answer options on the lines below it.</span></div>
+    <div class="row"><button class="mini" id="imp-parse" ${state.importText.trim()?'':'disabled'}>Review questions</button>
+    <label class="mini" style="cursor:pointer">Upload CSV<input type="file" id="imp-file" accept=".csv,text/csv" hidden></label></div>
+    <span class="hint">CSV columns: question, type, options (separate options with |).</span>
+    ${p?`<div class="parsed"><span class="eyebrow">${p.length} found · ${Math.min(p.length,room)} will be added</span>${p.map((q,i)=>`<div class="p ${i>=room?'over':''}"><span class="typetag">${TYPES[q.type]}</span><span>${esc(q.text)}${i>=room?' <span class="hint">· over the 5-question limit</span>':''}</span></div>`).join('')}
+      <button class="btn primary" id="imp-add" ${room<=0||!p.length?'disabled':''}>Add ${Math.min(p.length,room)} question${Math.min(p.length,room)===1?'':'s'}</button></div>`:''}`;
+}
+function panelAI(){
+  return `<div class="field"><label class="eyebrow" for="ai-goal">What do you want to learn?</label>
+    <textarea id="ai-goal" style="min-height:96px" placeholder="Test 2 names for a meal kit with people who order takeout weekly">${esc(state.aiGoal)}</textarea></div>
+    <div class="suggest">${['Test 2 names for a meal kit','Price check for a $12/month plan','Which homepage headline works best','NPS for our snack brand'].map(s=>`<button data-suggest="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+    <div class="radio" role="radiogroup" aria-label="Where the draft goes"><label><input type="radio" name="aimode" value="replace" ${state.aiMode==='replace'?'checked':''}> Replace survey</label><label><input type="radio" name="aimode" value="add" ${state.aiMode==='add'?'checked':''}> Add to survey</label></div>
+    <button class="btn primary" id="ai-go" ${state.aiGoal.trim()&&!state.aiBusy?'':'disabled'}>${state.aiBusy?'Drafting…':'Create draft'}</button>
+    <span class="hint">AI drafts the questions and a suggested screener. It never adds links or asks for personal data.</span>`;
+}
+function aiDraft(goal){
+  const g=goal.toLowerCase(); let t=TEMPLATES[1];
+  if(/name/.test(g)) t=TEMPLATES[0]; else if(/price|\$|pay/.test(g)) t=TEMPLATES[3]; else if(/nps|recommend|loyal/.test(g)) t=TEMPLATES[2]; else if(/headline|message|copy/.test(g)) t=TEMPLATES[4];
+  return {name:t.name, qs:t.qs.map(q=>({...clone(q), ai:true}))};
+}
+function viewBuilder(){
+  const d=state.draft;
+  const cards=d.qs.map((q,i)=>{
+    const opts=(q.type==='single'||q.type==='multi')?`<div class="field">${q.options.map((o,j)=>`<div class="opt"><span class="key">${j+1})</span>
+      <input type="text" id="q${i}-o${j}" data-q="${i}" data-o="${j}" value="${esc(o)}" placeholder="Option ${j+1}" maxlength="40">
+      <button class="iconbtn" data-delopt="${i}:${j}" aria-label="Remove option ${j+1}" ${q.options.length<=2?'disabled':''}>✕</button></div>`).join('')}
+      ${q.options.length<MAXOPT?`<button class="btn ghost" style="justify-self:start;padding:4px 0" data-addopt="${i}">+ Add option</button>`:''}</div>`:
+      `<p class="hint" style="margin:0">${{rating:'People reply with a number from 1 to 5.',nps:'People reply with a number from 0 to 10.',yesno:'People reply YES or NO.',number:'People reply with a number.',text:'People reply in a few words. AI groups answers into themes.'}[q.type]}</p>`;
+    return `<div class="qcard"><div class="qhead"><span class="qtag">Q${i+1}</span>
+      <select id="q${i}-type" data-type="${i}" aria-label="Question type">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${k===q.type?'selected':''}>${v}</option>`).join('')}</select>
+      ${q.ai?'<span class="aitag">AI</span>':''}<span style="flex:1"></span>
+      ${q.ai?`<button class="iconbtn" data-regen="${i}" aria-label="Regenerate Q${i+1}" style="color:var(--theme)">↻ Regenerate</button>`:''}
+      <button class="iconbtn" data-delq="${i}" aria-label="Delete Q${i+1}">Delete</button></div>
+      <input type="text" id="q${i}-text" data-qt="${i}" value="${esc(q.text)}" placeholder="Write your question" maxlength="120">
+      ${opts}</div>`;}).join('');
+  const p=problems(d);
+  const tabs={elements:'Form elements', import:'Import', ai:'Create with AI'};
+  return `<div class="view">
+    <div class="row spread"><button class="btn ghost" id="back-home">← Surveys</button>${stepper()}</div>
+    <div class="builder">
+      <aside class="addpanel" aria-label="Add questions"><h3>Add questions</h3>
+        <div class="tabs" role="tablist">${Object.entries(tabs).map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}</button>`).join('')}</div>
+        <div role="tabpanel" style="display:grid;gap:12px">${state.tab==='elements'?panelElements():state.tab==='import'?panelImport():panelAI()}</div>
+      </aside>
+      <div style="display:grid;gap:14px;min-width:0">
+        <div class="field"><label class="eyebrow" for="survey-name">Survey name</label><input type="text" id="survey-name" value="${esc(d.name)}" maxlength="60"></div>
+        ${d.screener?`<div class="qcard" style="background:var(--theme-soft)"><div class="qhead"><span class="qtag">Screener</span><span class="hint">Set in Audience · sent first</span><span style="flex:1"></span><button class="mini" id="back-aud3">Edit</button></div><b style="font-weight:500">${esc(d.screener.text)}</b><span class="hint">Keep: ${d.screener.keep.map(j=>['Yes','No'][j]).join(', ')}</span></div>`:''}
+        ${d.qs.length?cards:'<div class="canvas-empty"><h3>No questions yet</h3><p style="margin:6px 0 0">Add form elements, import your own questions, or create a draft with AI.</p></div>'}
+        <div class="row spread"><button class="btn" id="add-q" ${d.qs.length>=MAXQ?'disabled':''}>+ Write a question</button>
+          <span class="hint">${d.qs.length} question${d.qs.length===1?'':'s'} · about ${Math.max(20,d.qs.length*20)} seconds to answer · reward from ${fmt$(minReward(d.qs))}</span></div>
+        ${d.qs.length>LONG_SURVEY?'<div class="notice">Long surveys lose more people over text. Consider trimming, or move profile questions (age, gender, region) into audience filters.</div>':''}
+        ${p.length?`<div class="warn-text">${esc(p[0])}</div>`:''}
+        <div class="row spread"><button class="btn" id="back-aud2">Back to audience</button><button class="btn primary" id="to-pay" ${p.length?'disabled':''}>Continue to review</button></div>
+      </div>
+      <div class="phonecol"><div class="phone" aria-label="iMessage preview">${phoneThread(d)}</div><div class="phone-cap">What respondents see in Messages</div></div>
+    </div>
+  </div>`;
+}
+function promptFor(q,i,total){
+  let t=`Q${i+1}/${total}: ${q.text||'…'}`;
+  if(q.type==='single') t+='\n'+q.options.map((o,j)=>`${j+1}) ${o||'…'}`).join('\n');
+  if(q.type==='multi') t+='\n'+q.options.map((o,j)=>`${j+1}) ${o||'…'}`).join('\n')+'\nReply with all that apply, like 1,3';
+  if(q.type==='rating') t+='\nReply 1 (not at all) to 5 (very)';
+  if(q.type==='nps') t+='\nReply 0 (not likely) to 10 (very likely)';
+  if(q.type==='yesno') t+='\nReply YES or NO';
+  if(q.type==='number') t+='\nReply with a number';
+  return t;
+}
+const SAMPLE_REPLY={single:'1',multi:'1,3',rating:'4',nps:'9',yesno:'Yes',number:'15',text:'sounds more like real food'};
+function phoneThread(d){
+  const AQ=allQs(d); const total=AQ.length; const r=fmt$(d.reward||minReward(d.qs)).replace('.00','');
+  let html=`<div class="screen"><div class="who"><b>Mapier Research</b>iMessage · Today 10:42 AM</div>
+    <div class="bub in">Hi Jess, it’s ${esc(senderName())}. Got ${Math.max(20,total*20)} sec for a ${r} survey? Reply YES to start, STOP to opt out.</div><div class="bub out">Yes</div>`;
+  AQ.forEach((q,i)=>{ html+=`<div class="bub in">${esc(promptFor(q,i,total))}</div><div class="bub out">${SAMPLE_REPLY[q.type]}</div>`; });
+  html+= total?`<div class="bub in">Done, thanks! ${r} is on its way to your PayPal.</div></div>`:'</div>';
+  return html;
+}
+
+/* ---------- AUDIENCE (step 1) ---------- */
+const INCOMES=['Under $50k','$50k–$99k','$100k–$149k','$150k or more'], INCOME_SHARE=[0.35,0.3,0.18,0.17];
+const EMPLOY=['Full-time','Part-time','Self-employed','Student','Not working'], EMPLOY_SHARE=[0.48,0.14,0.1,0.1,0.18];
+const SHOP=['Weekly or more','1–3 times a month','Rarely'], SHOP_SHARE=[0.38,0.42,0.2];
+const allQs = d => d.screener ? [d.screener, ...d.qs] : d.qs;
+const STATES={South:['texas','florida','georgia','tennessee','carolina','alabama','virginia','louisiana','kentucky','oklahoma','arkansas','mississippi','atlanta','houston','dallas','austin','miami'],
+  West:['california','washington','oregon','nevada','arizona','colorado','utah','west coast','seattle','los angeles','san francisco','bay area','portland','denver','phoenix'],
+  Northeast:['new york','nyc','boston','massachusetts','new jersey','pennsylvania','connecticut','maine','philadelphia','east coast'],
+  Midwest:['illinois','chicago','ohio','michigan','minnesota','wisconsin','indiana','iowa','missouri','detroit','midwest']};
+function smartParse(text){
+  const t=' '+text.toLowerCase()+' '; const r={ages:null, gender:null, region:null, income:null, employment:null, kids:null, shopping:null, reasons:[], screener:null, refused:[]};
+  const why=(label,val,src)=>r.reasons.push({label,val,src});
+  const m=(re)=>{const x=t.match(re); return x?x[0].trim():null;};
+  let s;
+  if(s=m(/\bgen ?z\b|\bcollege\b|\bteens?\b/)){ r.ages=['18–24']; }
+  else if(s=m(/\bmillennials?\b/)){ r.ages=['25–34','35–44']; }
+  else if(s=m(/\bgen ?x\b/)){ r.ages=['45–54']; }
+  else if(s=m(/\bboomers?\b|\bseniors?\b|\bretirees?\b|over 55|55\+/)){ r.ages=['55+']; }
+  else if(s=m(/\bin their (20|30|40|50)s\b/)){ const d=s.match(/\d+/)[0]; r.ages={20:['18–24','25–34'],30:['25–34','35–44'],40:['35–44','45–54'],50:['45–54','55+']}[d]; }
+  else if(s=m(/\byoung adults?\b/)){ r.ages=['18–24','25–34']; }
+  if(r.ages) why('Age', r.ages.join(', '), s);
+  if(s=m(/\b(women|woman|female|females|moms?|mothers?|ladies)\b/)){ r.gender='Women'; why('Gender','Women',s); }
+  else if(s=m(/\b(men|man|male|males|dads?|fathers?|guys)\b/)){ r.gender='Men'; why('Gender','Men',s); }
+  if(s=m(/\b(moms?|mothers?|dads?|fathers?|parents?|with kids|have kids)\b/)){ r.kids='Yes'; why('Kids at home','Yes',s); }
+  for(const [reg,list] of Object.entries(STATES)){ const hit=list.find(w=>t.includes(' '+w)); if(hit){ r.region=reg; why('Region',reg,hit); break; } }
+  if(s=m(/high[- ]income|affluent|wealthy|high earners|\$100k/)){ r.income=['$100k–$149k','$150k or more']; why('Household income','$100k or more',s); }
+  else if(s=m(/low[- ]income|budget[- ]conscious|on a budget/)){ r.income=['Under $50k']; why('Household income','Under $50k',s); }
+  if(s=m(/\bprofessionals?\b|\bfull[- ]time\b|office workers?/)){ r.employment=['Full-time']; why('Employment','Full-time',s); }
+  else if(s=m(/\bstudents?\b/)){ r.employment=['Student']; why('Employment','Student',s); }
+  else if(s=m(/freelancers?|self[- ]employed|small business owners?/)){ r.employment=['Self-employed']; why('Employment','Self-employed',s); }
+  if(s=m(/shop(s|ping)? online (every week|weekly|often|a lot)|online shoppers?|order(s)? groceries online/)){ r.shopping='Weekly or more'; why('Online shopping','Weekly or more',s); }
+  const sens=t.match(/\b(diabet\w*|cancer|depress\w*|anxiety|pregnan\w*|religio\w*|christians?|muslims?|jewish|hindus?|black|asian|hispanic|latin[oax]s?|gay|lesbian|lgbtq?\+?|democrats?|republicans?|liberals?|conservatives?|disabilit\w*|disabled)\b/g);
+  if(sens) r.refused=[...new Set(sens)];
+  let pet=t.match(/\b(dog|cat|pet)[- ]owners?\b|\bwho (?:have|own) an? (dog|cat|pet)s?\b/);
+  if(pet){ const a=pet[1]||pet[2]; r.screener={type:'yesno', text:`Do you have a ${a}?`, keep:[0], screener:true, src:pet[0]}; }
+  else { const v=t.match(/\b(?:who|and|that) (drink|drinks|use|uses|buy|buys|eat|eats|play|plays|watch|watches|drive|drives|own|owns) ([a-z' ]+?)(?= (?:and|in|on|at|from|who|every|weekly)\b| $)/);
+    if(v){ const verb=v[1].replace(/s$/,'').replace(/ie$/,'y'); r.screener={type:'yesno', text:`Do you ${verb} ${v[2].trim()}?`, keep:[0], screener:true, src:v[0].trim()}; } }
+  return r;
+}
+function applySmart(d,r){
+  const a=d.aud; if(r.ages) a.ages=r.ages.slice(); if(r.gender) a.gender=r.gender; if(r.region) a.region=r.region;
+  if(r.income) a.income=r.income.slice(); if(r.employment) a.employment=r.employment.slice(); if(r.kids) a.kids=r.kids; if(r.shopping) a.shopping=r.shopping;
+  if(r.income||r.employment||r.kids||r.shopping) state.moreOpen=true;
+}
+function audienceCalc(d){
+  const a=d.aud; const share=(sel,all,sh)=>sel&&sel.length?sel.reduce((s,x)=>s+sh[all.indexOf(x)],0):1;
+  let f=share(a.ages,AGES,AGE_SHARE)*(a.gender==='Everyone'?1:0.5)*REGIONS[a.region]*share(a.income,INCOMES,INCOME_SHARE)*share(a.employment,EMPLOY,EMPLOY_SHARE);
+  if(a.kids!=='Any') f*= a.kids==='Yes'?0.35:0.65; if(a.shopping!=='Any') f*=SHOP_SHARE[SHOP.indexOf(a.shopping)]; if(a.excludePast) f*=0.92;
+  const eligible=Math.round(PANEL*f/10)*10;
+  const incidence=d.screener?Math.max(0.15, d.screener.keep.length/2*0.6):1;
+  const boost=Math.sqrt((d.reward||minReward(d.qs))/minReward(d.qs));
+  const hours=d.n/(Math.max(eligible,1)*0.0045*incidence*boost);
+  return {eligible, hours, incidence};
+}
+function fmtHours(h){ if(!isFinite(h)) return '—'; if(h<1) return `about ${Math.max(10,Math.round(h*60/5)*5)} min`; if(h<24){const H=Math.floor(h), M=Math.round((h-H)*60/15)*15; return `about ${H} h${M?` ${M} min`:''}`;} return `about ${Math.round(h/24*2)/2} days`; }
+function chipsFor(key, opts, selected, multi){
+  return `<div class="chips" role="group">${opts.map(x=>`<button class="chip" data-af="${key}" data-v="${esc(x)}" aria-pressed="${multi?selected.includes(x):selected===x}">${esc(x)}</button>`).join('')}</div>`;
+}
+function viewAudience(){
+  const d=state.draft, a=d.aud, c=audienceCalc(d), sm=state.smart;
+  const res=sm.result;
+  const resultHtml = res ? `<div class="smart-result">
+      ${res.reasons.length?`<span class="eyebrow">Applied ${res.reasons.length} filter${res.reasons.length===1?'':'s'}</span><div class="chips">${res.reasons.map(x=>`<span class="fchip"><b>${esc(x.label)}:</b> ${esc(x.val)} <span class="hint">· from “${esc(x.src)}”</span></span>`).join('')}</div>`:'<span class="hint">No profile filters matched. Try naming an age group, gender, place, income, job, kids or shopping habit.</span>'}
+      ${res.screener?(d.screener&&d.screener.text===res.screener.text?`<div class="notice">Screener added: “${esc(res.screener.text)}” Only people who answer Yes continue.</div>`:`<div class="notice" style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><span>Profiles can’t tell us “${esc(res.screener.src)}”. Suggested screener: <b>${esc(res.screener.text)}</b></span><button class="mini" id="smart-scr">Add screener</button></div>`):''}
+      ${res.refused.length?`<div class="notice" style="background:var(--bad-soft);color:var(--bad)">We don’t target by sensitive traits, so “${esc(res.refused.join('”, “'))}” was left out.</div>`:''}
+    </div>`:'';
+  const more = state.moreOpen ? `<div class="fields" style="gap:18px;padding-top:4px">
+      <div class="field"><span class="eyebrow">Household income</span>${chipsFor('income',INCOMES,a.income,true)}</div>
+      <div class="field"><span class="eyebrow">Employment</span>${chipsFor('employment',EMPLOY,a.employment,true)}</div>
+      <div class="field"><span class="eyebrow">Kids under 18 at home</span>${chipsFor('kids',['Any','Yes','No'],a.kids,false)}</div>
+      <div class="field"><span class="eyebrow">Shops online</span>${chipsFor('shopping',['Any',...SHOP],a.shopping,false)}</div></div>` : '';
+  const scr = d.screener ? `<div class="qcard" style="background:#fff"><div class="qhead"><span class="qtag">Screener</span><span class="typetag">Yes / No</span><span style="flex:1"></span><button class="iconbtn" id="scr-remove">Remove</button></div>
+      <input type="text" id="scr-text" value="${esc(d.screener.text)}" placeholder="Do you have a dog?" maxlength="120">
+      <div class="checks"><span class="hint">Keep people who answer:</span>${['Yes','No'].map((o,j)=>`<label><input type="checkbox" data-scrkeep="${j}" ${d.screener.keep.includes(j)?'checked':''}> ${o}</label>`).join('')}</div>
+      <span class="hint">Sent as the first question. People who don’t qualify stop here and get a ${fmt$(SCREEN_PAY)} screen-out payment.</span></div>`
+    : `<button class="btn" id="add-scr" style="justify-self:start">+ Add a screener question</button><span class="hint">For anything profiles can’t cover, like owning a dog or drinking oat milk.</span>`;
+  return `<div class="view">
+    <div class="row spread"><button class="btn ghost" id="back-home">← Surveys</button>${stepper()}</div>
+    <div class="split"><div style="display:grid;gap:18px;min-width:0">
+      <section class="panel smartbox" style="display:grid;gap:12px" aria-labelledby="sm-h">
+        <div class="row" style="gap:8px"><h2 id="sm-h">Who do you want to hear from?</h2><span class="badge">Smart filters</span></div>
+        <textarea id="smart-text" style="min-height:76px" placeholder="Moms in Texas who shop online every week">${esc(sm.text)}</textarea>
+        <div class="suggest">${['Moms in Texas who shop online every week','Gen Z dog owners','High-income professionals on the West Coast','Students in Chicago who drink oat milk'].map(s=>`<button data-smartex="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+        <div class="row"><button class="btn primary" id="smart-go" ${sm.text.trim()&&!sm.busy?'':'disabled'}>${sm.busy?'Setting filters…':'Set filters'}</button><span class="hint">AI maps your description to profile filters. Anything else becomes a suggested screener.</span></div>
+        ${resultHtml}
+      </section>
+      <section class="panel fields" aria-label="Filters">
+        <div class="field"><span class="eyebrow">Who can answer</span><p style="margin:0">US adults on iMessage from Mapier’s partner panel. Everyone has agreed to receive survey texts.</p></div>
+        <div class="field"><span class="eyebrow" id="age-l">Age</span><div class="chips" role="group" aria-labelledby="age-l">${AGES.map(x=>`<button class="chip" data-age="${x}" aria-pressed="${a.ages.includes(x)}">${x}</button>`).join('')}</div>
+          ${a.ages.length?'':'<span class="hint">All ages included</span>'}</div>
+        <div class="field"><span class="eyebrow" id="g-l">Gender</span><div class="chips" role="group" aria-labelledby="g-l">${['Everyone','Women','Men'].map(x=>`<button class="chip" data-gender="${x}" aria-pressed="${a.gender===x}">${x}</button>`).join('')}</div></div>
+        <div class="field"><label class="eyebrow" for="region">Region</label><select id="region">${Object.keys(REGIONS).map(x=>`<option ${x===a.region?'selected':''}>${x}</option>`).join('')}</select></div>
+        <button class="btn ghost" id="more-toggle" style="justify-self:start">${state.moreOpen?'− Fewer filters':'+ More filters'}</button>
+        ${more}
+        <label class="switch"><input type="checkbox" id="ex-past" ${a.excludePast?'checked':''}> <span><b>Don’t invite people who took my past surveys</b><br><span class="hint">Keeps repeat name and concept tests fresh.</span></span></label>
+      </section>
+      <section class="panel fields" aria-labelledby="scr-h"><h3 id="scr-h">Screener</h3>${scr}</section>
+    </div>
+    <div style="display:grid;gap:14px;align-self:start;position:sticky;top:110px">
+      <div class="panel" style="display:grid;gap:18px">
+        <div class="stat"><span class="eyebrow">Eligible people</span><span class="num">${fmtN(c.eligible)}</span></div>
+        <div class="stat"><span class="eyebrow">Time to ${fmtN(d.n)} responses</span><span class="num" style="font-size:20px">${fmtHours(c.hours)}</span>
+          <span class="hint">Estimate based on recent reply rates for this audience${d.screener?' and your screener':''}.</span></div>
+        ${c.eligible<d.n*3?'<div class="warn-text">This audience is small. Widen a filter or expect a slower fill.</div>':''}
+      </div>
+      <div class="row spread"><button class="btn" id="back-home2">Cancel</button><button class="btn primary" id="to-questions" ${d.screener&&(!d.screener.text.trim()||!d.screener.keep.length)?'disabled':''}>Continue to questions</button></div>
+    </div></div>
+  </div>`;
+}
+
+/* ---------- REVIEW & PAY ---------- */
+function pricing(d){
+  const reward=d.reward||minReward(d.qs); const fee=reward*FEE; const per=reward+fee;
+  const cap=d.screener?Math.round(d.n*d.capPct):0; const screenPer=SCREEN_PAY*(1+FEE);
+  const reserve=+(d.n*per + cap*screenPer).toFixed(2);
+  const short=Math.max(0, reserve-wallet.available); const topup=short>0?Math.max(MIN_TOPUP, Math.ceil(short*100)/100):0;
+  return {reward, fee, per, cap, screenPer, reserve, short, topup};
+}
+function viewPay(){
+  const d=state.draft, p=pricing(d); const min=minReward(d.qs);
+  const aud=[d.aud.ages.length?d.aud.ages.join(', '):'All ages', d.aud.gender, d.aud.region].join(' · ');
+  return `<div class="view">
+    <div class="row spread"><button class="btn ghost" id="back-home">← Surveys</button>${stepper()}</div>
+    <div class="split"><div class="panel" style="display:grid;gap:22px">
+      <h2>${esc(d.name)}</h2>
+      <div class="lines">
+        <div class="line"><span class="muted">Questions</span><span>${d.qs.length}</span></div>
+        <div class="line"><span class="muted">Audience</span><span style="text-align:right">${esc(aud)}</span></div>
+        <div class="line"><span class="muted">Screener</span><span>${d.screener?esc(d.screener.text):'None'}</span></div>
+        <div class="line"><span class="muted">Estimated fill time</span><span>${fmtHours(audienceCalc(d).hours)}</span></div>
+      </div>
+      <div class="field"><label class="eyebrow" for="n">Completed responses</label>
+        <div class="stepperinput"><button class="btn" id="n-dec" aria-label="Decrease by 50">−</button><input type="number" id="n" class="num" min="50" max="2000" step="50" value="${d.n}"><button class="btn" id="n-inc" aria-label="Increase by 50">+</button></div>
+        <span class="hint">Minimum 50. Responses that fail quality checks are never billed.</span></div>
+      <div class="field"><label class="eyebrow" for="reward">Reward per respondent</label>
+        <div class="stepperinput"><button class="btn" id="r-dec" aria-label="Decrease reward" ${p.reward<=min?'disabled':''}>−</button><input type="text" id="reward" class="num" value="${fmt$(p.reward)}" readonly><button class="btn" id="r-inc" aria-label="Increase reward">+</button></div>
+        <span class="hint">Minimum ${fmt$(min)} for a ${d.qs.length}-question survey. A higher reward fills faster.</span></div>
+      ${d.screener?`<div class="field"><label class="eyebrow" for="cap">Screen-out cap</label><select id="cap">${[0.25,0.5,1].map(x=>`<option value="${x}" ${x===d.capPct?'selected':''}>${Math.round(d.n*x)} people (${x*100}% of responses)</option>`).join('')}</select>
+        <span class="hint">The survey pauses if screen-outs reach the cap. Unused slots are refunded to your balance.</span></div>`:''}
+    </div>
+    <div style="display:grid;gap:14px"><div class="panel lines">
+      <div class="line"><span>${fmtN(d.n)} × ${fmt$(p.reward)} reward</span><span class="num">${fmt$(d.n*p.reward)}</span></div>
+      <div class="line"><span>Platform fee (${FEE*100}%)</span><span class="num">${fmt$(d.n*p.fee)}</span></div>
+      ${p.cap?`<div class="line"><span>Screen-outs, up to ${fmtN(p.cap)} × ${fmt$(p.screenPer)}</span><span class="num">${fmt$(p.cap*p.screenPer)}</span></div>`:''}
+      <div class="line total"><span>Reserved at launch</span><span class="num">${fmt$(p.reserve)}</span></div>
+      <span class="hint">You’re charged only for approved responses and screen-outs. Everything unspent returns to your balance when the survey ends.</span>
+      <div class="line" style="margin-top:6px"><span class="muted">Available balance</span><span class="num">${fmt$(wallet.available)}</span></div>
+      ${p.short>0?`<div class="notice">Your balance is ${fmt$(p.short)} short. We’ll charge ${esc(mainCard())} ${fmt$(p.topup)} and add it to your balance${p.topup>p.short?` (minimum top-up ${fmt$(MIN_TOPUP)})`:''}.</div>`:`<div class="line"><span class="muted">Balance after launch</span><span class="num">${fmt$(wallet.available-p.reserve)}</span></div>`}
+      <span class="hint"><span class="proto">Placeholder pricing</span> Fee and minimum rewards are TBD.</span>
+    </div>
+    <div class="row spread"><button class="btn" id="back-aud">Back</button><button class="btn primary" id="launch">${p.short>0?`Top up ${fmt$(p.topup)} and launch`:`Reserve ${fmt$(p.reserve)} and launch`}</button></div></div></div>
+  </div>`;
+}
+function runReview(){
+  const steps=['Checking for links and personal-data requests','Checking for sales pitches and restricted topics','Reserving funds and sending invites'];
+  const root=$('#overlay-root'); let k=0;
+  const draw=()=>{ root.innerHTML=`<div class="overlay" role="dialog" aria-modal="true" aria-labelledby="rv-h"><div class="panel"><h2 id="rv-h">Launching your survey</h2>
+    ${steps.map((s,i)=>`<div class="check-row"><span class="tick ${i<k?'ok':i===k?'run':''}">${i<k?'✓':''}</span><span class="${i>k?'muted':''}">${s}</span></div>`).join('')}</div></div>`; };
+  draw(); const t=setInterval(()=>{k++; draw(); if(k>=steps.length){clearInterval(t); setTimeout(()=>{root.innerHTML='';
+    const d=state.draft, p=pricing(d);
+    if(p.topup){ wallet.available+=p.topup; txns.unshift({date:'Today', desc:'Top-up at checkout', survey:'—', amt:p.topup, receipt:true}); }
+    wallet.available-=p.reserve; wallet.reserved+=p.reserve; txns.unshift({date:'Today', desc:'Reserved for launch', survey:d.name, amt:-p.reserve});
+    const s={id:'s'+Date.now(), name:d.name, status:'live', n:d.n, got:0, reward:p.reward, cap:p.cap, reserve:p.reserve, audience:audLabel(d), updated:'Just now', qs:clone(allQs(d))};
+    surveys.unshift(s); state.draft=null; openResults(s.id); toast(`Survey launched · ${fmt$(p.reserve)} reserved`);},500);} },900);
+}
+function audLabel(d){ const a=d.aud; const ag=a.ages.length?(a.ages.length===1?a.ages[0]:a.ages[0].split('–')[0]+'–'+a.ages[a.ages.length-1].split('–').pop()):'All ages'; return 'US · '+ag; }
+
+/* ---------- RESULTS ---------- */
+function weightsFor(q, salt){
+  if(q.w) return q.w;
+  const n=q.type==='single'||q.type==='multi'?q.options.length:q.type==='rating'?5:q.type==='yesno'?2:q.type==='nps'?11:0;
+  const raw=Array.from({length:n},(_,i)=>0.4+((hash(q.text+i+salt)%1000)/1000)*1.6);
+  if(q.type==='nps'){ for(let i=0;i<11;i++) raw[i]*= i>=9?3.2:i>=7?2.2:0.6; }
+  const s=raw.reduce((a,b)=>a+b,0); return raw.map(x=>x/s);
+}
+function countsFrom(w, n){ const c=w.map(x=>Math.floor(x*n)); let r=n-c.reduce((a,b)=>a+b,0); const order=w.map((x,i)=>[x*n-Math.floor(x*n),i]).sort((a,b)=>b[0]-a[0]); for(let i=0;i<r;i++) c[order[i%order.length][1]]++; return c; }
+function filteredN(s){ const f=state.filter; let k=1; if(f.age!=='All ages') k*=0.22; if(f.gender!=='Everyone') k*=0.5; if(f.region!=='All US') k*=REGIONS[f.region]; return Math.round(s.got*k); }
+function salt(){ const f=state.filter; return f.age+f.gender+f.region; }
+const GENERIC_TOPICS=[['Taste and quality',42,8,6],['Price and value',18,10,22],['Convenience',30,6,4],['Trust in the brand',14,9,7]];
+function labelsFor(q){ return q.type==='single'||q.type==='multi'?q.options:q.type==='rating'?['1','2','3','4','5']:q.type==='yesno'?['Yes','No']:q.type==='nps'?Array.from({length:11},(_,i)=>String(i)):[]; }
+function qPanel(s,q,i,n){
+  const insight = s.insights?.[i];
+  if(n<30) return `<div class="empty-note">Only <span class="num">${n}</span> responses match. Breakdowns appear at 30 or more, so widen the filter or wait for more responses.</div>`;
+  if(q.type==='text'){
+    const topics=q.topics||GENERIC_TOPICS; const scale=n/(s.got||1); const max=Math.max(...topics.map(t=>t[1]+t[2]+t[3]));
+    const bars=topics.map(t=>{const [name,p,u,g]=t; const tot=Math.round((p+u+g)*scale); const W=v=>((v/max)*100).toFixed(1)+'%';
+      return `<div class="bar-row"><div class="lab"><span>${esc(name)}</span><span class="num">${tot}</span></div>
+      <div class="bar-track" style="background:transparent"><i style="width:${W(p)};background:var(--good)"></i><i style="width:${W(u)};background:var(--neutral)"></i><i style="width:${W(g)};background:var(--bad)"></i></div></div>`;}).join('');
+    const top=topics.slice().sort((a,b)=>(b[1]+b[2]+b[3])-(a[1]+a[2]+a[3]))[0];
+    return `<div class="qbody"><div class="insight"><span class="row" style="gap:8px"><b>Top insight</b><span class="badge">AI</span></span>
+      <span>${esc(insight||`“${top[0]}” is the most common theme. Answers about it are mostly ${top[1]>=top[3]?'positive':'negative'}.`)}</span>
+      ${(q.quotes||['“Tastes like the real thing.”','“A bit pricey for what you get.”']).map(x=>`<div class="quote">${esc(x)}</div>`).join('')}</div>
+      <div style="display:grid;gap:14px;min-width:0"><div class="legend"><span><i style="background:var(--good)"></i>Positive</span><span><i style="background:var(--neutral)"></i>Neutral</span><span><i style="background:var(--bad)"></i>Negative</span></div><div class="bars">${bars}</div>
+      <span class="hint">Themes and sentiment grouped by AI from ${fmtN(n)} answers.</span></div></div>`;
+  }
+  if(q.type==='number'){
+    const med=12+(hash(q.text)%8); return `<div class="qbody"><div class="insight"><span class="row" style="gap:8px"><b>Top insight</b><span class="badge">AI</span></span><span>Most answers fall between ${med-4} and ${med+5}.</span></div>
+      <div style="display:grid;gap:6px"><span class="eyebrow">Median answer</span><span class="bignum">${med}</span><span class="hint">Middle 50%: ${med-4}–${med+5} · ${fmtN(n)} answers</span></div></div>`;
+  }
+  const w=weightsFor(q, salt()); const c=countsFrom(w,n); const labs=labelsFor(q);
+  let extra='';
+  if(q.type==='nps'){ const pro=c.slice(9).reduce((a,b)=>a+b,0), det=c.slice(0,7).reduce((a,b)=>a+b,0); const score=Math.round((pro-det)/n*100);
+    extra=`<div style="display:grid;gap:4px;margin-bottom:10px"><span class="eyebrow">NPS</span><span class="bignum">${score>0?'+':''}${score}</span><span class="hint">${Math.round(pro/n*100)}% promoters · ${Math.round(det/n*100)}% detractors</span></div>`; }
+  if(q.type==='rating'){ const avg=c.reduce((a,v,j)=>a+v*(j+1),0)/n; extra=`<div style="display:grid;gap:4px;margin-bottom:10px"><span class="eyebrow">Average</span><span class="bignum">${avg.toFixed(1)}<span class="muted" style="font-size:18px"> / 5</span></span></div>`; }
+  const order=labs.map((l,j)=>j); if(q.type==='single'||q.type==='multi') order.sort((a,b)=>c[b]-c[a]);
+  const max=Math.max(...c);
+  const bars=order.map(j=>`<div class="bar-row"><div class="lab"><span>${esc(labs[j])}</span><span class="num">${c[j]} · ${Math.round(c[j]/n*100)}%</span></div>
+    <div class="bar-track"><i style="width:${(c[j]/max*100).toFixed(1)}%;background:var(--theme);opacity:${c[j]===max?1:0.5}"></i></div></div>`).join('');
+  const topJ=c.indexOf(max);
+  return `<div class="qbody"><div class="insight"><span class="row" style="gap:8px"><b>Top insight</b><span class="badge">AI</span></span><span>${esc(insight||`“${labs[topJ]}” leads with ${Math.round(max/n*100)}% of ${fmtN(n)} answers.`)}</span></div>
+    <div style="min-width:0">${extra}<div class="bars">${bars}</div></div></div>`;
+}
+function summaryFor(s){
+  const f=state.filter; if(s.summary && s.status==='done' && f.age==='All ages' && f.gender==='Everyone' && f.region==='All US') return s.summary;
+  const n=Math.max(filteredN(s),1); const out=[];
+  s.qs.forEach((q,i)=>{ if(out.length>=3) return; if(['single','yesno','rating'].includes(q.type)){ const c=countsFrom(weightsFor(q,salt()),n); const labs=labelsFor(q); const m=c.indexOf(Math.max(...c));
+      out.push(q.type==='rating'?`Q${i+1}: average rating is ${(c.reduce((a,v,j)=>a+v*(j+1),0)/n).toFixed(1)} out of 5`:`Q${i+1}: ${Math.round(c[m]/n*100)}% chose “${labs[m]}”`);}
+    if(q.type==='text'){ const t=(q.topics||GENERIC_TOPICS)[0]; out.push(`Q${i+1}: the most common theme is “${t[0]}”`);} });
+  return out;
+}
+function recentResponses(s){
+  const rows=[]; const k=Math.min(5,s.got);
+  for(let r=0;r<k;r++){ const idx=s.got-r; const parts=s.qs.slice(0,3).map((q,i)=>{const labs=labelsFor(q); if(labs.length){const w=weightsFor(q,'r'+idx); const pick=hash(String(idx)+i)%1000/1000; let acc=0; let j=0; for(;j<w.length;j++){acc+=w[j]; if(pick<acc) break;} return labs[Math.min(j,labs.length-1)];}
+      if(q.type==='number') return String(10+hash(String(idx))%15); const a=q.answers||['tastes great','too pricey','would try it','not for me','love the flavor']; return a[hash(String(idx)+i)%a.length];});
+    rows.push({id:`${s.id}-${idx}`, num:idx, ago: r===0?'just now':`${r*4} min ago`, text:parts.join(' · ')}); }
+  return rows;
+}
+function viewResults(){
+  const s=surveys.find(x=>x.id===state.resultsId); const n=filteredN(s); const pct=Math.round(s.got/s.n*100);
+  const q=s.qs[state.qi]; const f=state.filter; const per=s.reward*(1+FEE); const spent=s.got*per;
+  const sel=(id,opts,val)=>`<select id="${id}" aria-label="${id}">${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select>`;
+  const recent=recentResponses(s);
+  return `<div class="view">
+    <div><button class="btn ghost" id="back-home">← Surveys</button></div>
+    <div class="row spread" style="align-items:flex-end">
+      <div style="display:grid;gap:6px"><div class="row" style="gap:10px"><h1>${esc(s.name)}</h1>${s.status==='live'?'<span class="pill live">Live</span>':'<span class="pill done">Completed</span>'}</div>
+        <span class="muted">${esc(s.audience)} · ${s.qs.length} questions${s.fillTime?` · filled in ${s.fillTime}`:''}</span></div>
+      <div class="row"><button class="btn" id="export">Export CSV</button><button class="btn" id="share">Share link</button></div>
+    </div>
+    <div class="panel" style="display:grid;gap:12px">
+      <div class="row spread"><span><span class="num" style="font-size:22px">${fmtN(s.got)}</span> <span class="muted">of ${fmtN(s.n)} responses</span></span>
+        <span class="hint">Spent <span class="num">${fmt$(spent)}</span> of <span class="num">${fmt$(s.reserve)}</span> reserved</span></div>
+      <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    </div>
+    <div class="row"><span class="eyebrow">Filter</span>${sel('Age',['All ages',...AGES],f.age)}${sel('Gender',['Everyone','Women','Men'],f.gender)}${sel('Region',Object.keys(REGIONS),f.region)}
+      <span class="hint">${fmtN(n)} responses match</span></div>
+    <section class="ai" aria-labelledby="ai-h"><div class="row" style="gap:8px"><h2 id="ai-h">AI summary</h2><span class="badge">AI-powered</span></div>
+      ${s.got<30?'<p class="muted" style="margin:0">The summary appears after 30 responses.</p>':`<ul>${summaryFor(s).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`}
+      ${s.status==='live'&&s.got>=30?'<span class="hint">Updates as more responses arrive.</span>':''}</section>
+    <section class="panel" style="display:grid;gap:18px" aria-labelledby="pq-h">
+      <div class="row spread"><h2 id="pq-h">Per-question analysis</h2>
+        <div class="row" style="gap:6px"><div class="qnav">${s.qs.map((_,i)=>`<button data-qi="${i}" aria-current="${i===state.qi}">Q${i+1}</button>`).join('')}</div>
+        <button class="btn" id="q-prev" aria-label="Previous question" ${state.qi===0?'disabled':''}>‹</button><button class="btn" id="q-next" aria-label="Next question" ${state.qi===s.qs.length-1?'disabled':''}>›</button></div></div>
+      <div style="display:grid;gap:2px"><h3 style="font-size:18px">${esc(q.text)}</h3><span class="hint">${TYPES[q.type]} · ${fmtN(n)} responses</span></div>
+      ${qPanel(s,q,state.qi,n)}
+    </section>
+    <section class="panel" style="display:grid;gap:12px" aria-labelledby="rr-h">
+      <div class="row spread"><h2 id="rr-h">Latest responses</h2><span class="hint">Something off? Report a response within 7 days of the survey finishing. If we uphold it, ${fmt$(per)} returns to your balance.</span></div>
+      ${recent.length?`<div class="tablewrap"><table><tbody>${recent.map(r=>`<tr style="cursor:default"><td class="num muted">#${r.num}</td><td style="white-space:normal">${esc(r.text)}</td><td class="muted">${r.ago}</td>
+        <td style="text-align:right">${state.reported[r.id]?'<span class="reported">Reported · under review</span>':`<button class="mini" data-report="${r.id}">Report</button>`}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted" style="margin:0">Responses will appear here as they arrive.</p>'}
+    </section>
+  </div>`;
+}
+function openResults(id){
+  state.resultsId=id; state.qi=0; state.filter={age:'All ages',gender:'Everyone',region:'All US'}; go('results');
+  const s=surveys.find(x=>x.id===id);
+  if(s.status==='live'){ clearInterval(ticker); ticker=setInterval(()=>{ const before=s.got; s.got=Math.min(s.n, s.got+3+Math.floor(Math.random()*7));
+      const per=s.reward*(1+FEE); const cost=(s.got-before)*per; wallet.reserved-=cost; wallet.spentMonth+=cost;
+      if(s.got>=s.n){ s.status='done'; s.fillTime='1 h 40 min'; clearInterval(ticker); ticker=null;
+        const used=Math.round(s.cap*0.3); const sp=used*SCREEN_PAY*(1+FEE); const release=Math.max(0,+(s.reserve - s.n*per - sp).toFixed(2));
+        wallet.reserved=Math.max(0,wallet.reserved-sp-release); wallet.spentMonth+=sp; wallet.available+=release;
+        if(release>0) txns.unshift({date:'Today', desc:'Released: unused screen-out slots', survey:s.name, amt:release});
+        toast(release>0?`All responses are in · ${fmt$(release)} returned to your balance`:'All responses are in'); }
+      updatePill(); if(state.view==='results' && state.resultsId===id){ const y=window.scrollY; render(); window.scrollTo(0,y);} },1200); }
+}
+
+/* ---------- BILLING ---------- */
+function viewBilling(){
+  const at=wallet.autoTopup;
+  const methods=wallet.methods.map(m=>`<div class="card-mock"><span><b style="font-weight:500">${esc(m.brand)}</b>${m.last4?` ending ${m.last4} <span class="hint">· exp ${m.exp}</span>`:''}
+    ${m.main?' <span class="pill done" style="margin-left:6px">Main</span>':m.backup?' <span class="pill" style="margin-left:6px">Backup</span>':''}${m.expSoon?' <span class="warn-text" style="font-size:12px;margin-left:6px">Expires soon</span>':''}</span>
+    <span class="row" style="gap:6px">${m.main?'':`<button class="mini" data-pm-main="${m.id}">Make main</button>`}${!m.main&&!m.backup&&m.last4?`<button class="mini" data-pm-backup="${m.id}">Use as backup</button>`:''}
+    <button class="iconbtn" data-pm-remove="${m.id}" ${m.main&&at.on?'disabled title="Choose another main method or turn off auto top-up first"':''}>Remove</button></span></div>`).join('');
+  return `<div class="view">
+    <div class="row spread"><div><h1>Billing</h1><p class="muted" style="margin:6px 0 0">Prepaid balance for Acme Snacks. Launching a survey reserves its cost; unspent funds come back when it ends.</p></div>
+      <button class="btn primary" id="topup-open">Top up</button></div>
+    <div class="statgrid">
+      <div class="statcard"><span class="eyebrow">Available</span><span class="num">${fmt$(wallet.available)}</span><span class="hint">Ready for new surveys</span></div>
+      <div class="statcard"><span class="eyebrow">Reserved</span><span class="num">${fmt$(wallet.reserved)}</span><span class="hint">Held for live surveys</span></div>
+      <div class="statcard"><span class="eyebrow">Spent this month</span><span class="num">${fmt$(wallet.spentMonth)}</span><span class="hint">Approved responses and screen-outs</span></div>
+    </div>
+    ${state.topupOpen?`<div class="panel" style="display:grid;gap:14px"><h2>Add funds</h2><div class="chips">${[50,100,250,500].map(v=>`<button class="chip" data-amt="${v}" aria-pressed="${state.topupAmt===v}">$${v}</button>`).join('')}</div>
+      <div class="chips" role="group" aria-label="Pay with">${wallet.methods.map(m=>`<button class="chip" data-paywith="${m.id}" aria-pressed="${state.payWith===m.id}">${esc(m.brand)}${m.last4?' ·· '+m.last4:''}</button>`).join('')}</div>
+      <div class="row"><button class="btn primary" id="topup-go">Add $${state.topupAmt}</button><button class="btn" id="topup-cancel">Cancel</button><span class="hint">Minimum top-up ${fmt$(MIN_TOPUP)}. Receipt goes to ${esc(wallet.details.email)}.</span></div></div>`:''}
+    <div class="split" style="grid-template-columns:minmax(0,1fr) 440px">
+      <section class="panel" style="display:grid;gap:10px;align-self:start" aria-labelledby="tx-h"><h2 id="tx-h">Transactions</h2>
+        <div class="tablewrap"><table><thead><tr><th>Date</th><th>Description</th><th>Survey</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody>
+        ${txns.map(t=>`<tr style="cursor:default"><td class="muted">${t.date}</td><td>${esc(t.desc)}</td><td class="muted">${esc(t.survey)}</td><td class="num ${t.amt>0?'amt-pos':'amt-neg'}" style="text-align:right">${t.amt>0?'+':''}${fmt$(t.amt)}</td>
+          <td style="text-align:right">${t.receipt?'<button class="mini" data-receipt="1">Receipt</button>':''}</td></tr>`).join('')}</tbody></table></div></section>
+      <div style="display:grid;gap:14px">
+        <section class="panel" style="display:grid;gap:10px" aria-labelledby="pm-h"><h3 id="pm-h">Payment methods</h3>${methods}
+          <div class="row"><button class="mini" id="pm-add">Add card</button><button class="mini" data-pm-wallet="Apple Pay" ${wallet.methods.some(m=>m.brand==='Apple Pay')?'disabled':''}>Add Apple Pay</button><button class="mini" data-pm-wallet="Google Pay" ${wallet.methods.some(m=>m.brand==='Google Pay')?'disabled':''}>Add Google Pay</button></div>
+          <span class="hint">The main method pays for top-ups and launch shortfalls. If it’s declined, we try the backup. Mapier covers card processing fees.</span></section>
+        <section class="panel" style="display:grid;gap:12px" aria-labelledby="at-h"><div class="row spread"><h3 id="at-h">Auto top-up</h3><label class="switch" style="align-items:center"><input type="checkbox" id="at-on" ${at.on?'checked':''}> <span>${at.on?'On':'Off'}</span></label></div>
+          <div class="row" style="gap:8px;font-size:14px">When available balance drops below <select id="at-below">${[25,50,100,250].map(v=>`<option value="${v}" ${v===at.below?'selected':''}>$${v}</option>`).join('')}</select> add <select id="at-amt">${[100,200,500,1000].map(v=>`<option value="${v}" ${v===at.amt?'selected':''}>$${v}</option>`).join('')}</select></div>
+          <span class="hint">Keeps live surveys from stalling. If the charge fails on both methods, we email ${esc(wallet.details.email)}.</span></section>
+        <section class="panel" style="display:grid;gap:10px" aria-labelledby="bd-h"><h3 id="bd-h">Billing details</h3>
+          <div class="field"><label class="eyebrow" for="bd-addr">Billing address</label><input type="text" id="bd-addr" data-bd="address" value="${esc(wallet.details.address)}"></div>
+          <div class="field"><label class="eyebrow" for="bd-tax">Tax ID (optional)</label><input type="text" id="bd-tax" data-bd="tax" value="${esc(wallet.details.tax)}" placeholder="EIN, e.g. 12-3456789"></div>
+          <div class="field"><label class="eyebrow" for="bd-email">Send receipts to</label><input type="text" id="bd-email" data-bd="email" value="${esc(wallet.details.email)}"></div></section>
+        <section class="panel" style="display:grid;gap:10px"><h3>How billing works</h3>
+          <ul style="margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px;color:var(--ink-2)">
+            <li>Each response costs its reward plus a ${FEE*100}% platform fee.</li>
+            <li>Failed quality checks are never billed.</li>
+            <li>Unused funds return to your balance when a survey ends.</li>
+            <li>Available balance can be withdrawn to your card.</li></ul>
+          <button class="btn" id="withdraw">Request a withdrawal</button></section>
+      </div>
+    </div>
+  </div>`;
+}
+function viewSettings(){
+  const S=settings;
+  const sec=(id,title,desc,body)=>`<section class="panel" id="set-${id}" style="display:grid;gap:16px;scroll-margin-top:110px" aria-labelledby="h-${id}"><div><h2 id="h-${id}">${title}</h2>${desc?`<p class="hint" style="margin:4px 0 0">${desc}</p>`:''}</div>${body}</section>`;
+  const check=(key,label,hint)=>`<label class="switch"><input type="checkbox" data-set="notify.${key}" ${S.notify[key]?'checked':''}> <span>${label}${hint?`<br><span class="hint">${hint}</span>`:''}</span></label>`;
+  const sel=(key,opts,label)=>`<div class="field"><label class="eyebrow" for="s-${key}">${label}</label><select id="s-${key}" data-set="${key}">${opts.map(([v,l])=>`<option value="${v}" ${String(v)===String(S.get(key))?'selected':''}>${l}</option>`).join('')}</select></div>`;
+  const nav=[['account','Account'],['notifications','Notifications'],['defaults','Survey defaults'],['invites','Invites'],['privacy','Data & privacy'],['team','Team'],['billing','Billing']];
+  return `<div class="view">
+    <div><h1>Settings</h1><p class="muted" style="margin:6px 0 0">Preferences for you and the Acme Snacks workspace. Changes save automatically.</p></div>
+    <div class="settings">
+      <nav class="setnav" aria-label="Settings sections">${nav.map(([k,l])=>`<button data-jump="${k}">${l}</button>`).join('')}</nav>
+      <div style="display:grid;gap:20px;min-width:0">
+      ${sec('account','Account','',`
+        <div class="field"><label class="eyebrow" for="s-name">Name</label><input type="text" id="s-name" data-set="name" value="${esc(S.name)}"></div>
+        <div class="field"><span class="eyebrow">Work email</span><div class="card-mock"><span>${esc(S.email)}</span><button class="mini" id="s-email">Change</button></div></div>
+        <div class="field"><span class="eyebrow">Sign in with</span><div class="radio"><label><input type="radio" name="signin" value="email" ${S.signin==='email'?'checked':''}> Email link</label><label><input type="radio" name="signin" value="google" ${S.signin==='google'?'checked':''}> Google</label></div></div>
+        <div><button class="btn" id="s-signout">Sign out of all devices</button></div>`)}
+      ${sec('notifications','Notifications','Emails go to '+esc(S.email)+'.',`<div style="display:grid;gap:12px">
+        ${check('launched','Survey launched')}${check('filled','Survey filled','Sent when the last response is in.')}
+        ${check('slow','Survey filling slowly','Sent when a survey falls well behind its estimated fill time.')}
+        ${check('lowbal','Low balance','Sent when available balance drops below $50.')}${check('weekly','Weekly spend summary','Every Monday.')}</div>`)}
+      ${sec('defaults','Survey defaults','Applied to new surveys. You can change them on each survey.',`<div class="row" style="align-items:flex-start;gap:20px">
+        ${sel('defaults.rewardBump',[[0,'Minimum for survey length'],[0.25,'Minimum + $0.25'],[0.5,'Minimum + $0.50']],'Reward')}
+        ${sel('defaults.capPct',[[0.25,'25% of responses'],[0.5,'50% of responses'],[1,'100% of responses']],'Screen-out cap')}
+        ${sel('defaults.reminder',[['off','Off'],['30m','After 30 min'],['1h','After 1 hour'],['3h','After 3 hours']],'Reminder for quiet respondents')}
+        ${sel('defaults.runDays',[[3,'3 days'],[7,'7 days'],[14,'14 days']],'End a survey after')}</div>
+        <span class="hint">When a survey ends, unspent funds return to your balance.</span>`)}
+      ${sec('invites','Invites','How the first text introduces the survey.',`<div class="radio" style="flex-direction:column;gap:10px">
+        <label><input type="radio" name="sender" value="mapier" ${S.sender==='mapier'?'checked':''}> <span><b style="font-weight:500">Mapier Research</b> <span class="hint">· recommended for name and concept tests, so your brand doesn’t sway answers</span></span></label>
+        <label><input type="radio" name="sender" value="branded" ${S.sender==='branded'?'checked':''}> <span><b style="font-weight:500">Mapier Research for Acme Snacks</b> <span class="hint">· for feedback from people who know your brand</span></span></label></div>
+        <div class="screen" style="height:auto;border:1px solid var(--hair);max-width:380px"><div class="bub in">Hi Jess, it’s ${esc(senderName())}. Got 60 sec for a $1 survey? Reply YES to start, STOP to opt out.</div></div>`)}
+      ${sec('privacy','Data & privacy','Phone numbers are never shared with you. Answers are linked to an anonymous respondent ID.',`
+        ${sel('retention',[['90','90 days'],['365','1 year'],['forever','Until I delete them']],'Keep responses for')}
+        <div class="row"><button class="btn" id="s-export">Export all data</button><button class="btn" id="s-delete" style="color:var(--bad)">Delete workspace</button></div>
+        ${state.confirmDelete?`<div class="notice" style="background:var(--bad-soft);color:var(--bad)">Deleting removes all surveys and responses for good. Withdraw your available balance first. <button class="mini" id="s-delete-cancel" style="margin-left:6px">Keep workspace</button></div>`:''}`)}
+      ${sec('team','Team','',`<div class="row spread"><span>Invite teammates and set roles (admin, editor, viewer).</span><span class="pill">Coming soon</span></div>`)}
+      ${sec('billing','Billing','',`<div class="row spread"><span class="muted">Payment methods, auto top-up and billing details are on the Billing page.</span><button class="btn" id="s-to-billing">Go to Billing</button></div>`)}
+      </div></div>
+  </div>`;
+}
+function updatePill(){ $('#bal-pill').textContent='Balance '+fmt$(wallet.available); }
+
+/* ---------- RENDER + EVENTS ---------- */
+function render(){
+  document.querySelectorAll('.nav button').forEach(b=>b.removeAttribute('aria-current'));
+  (state.view==='billing'?$('#nav-billing'):state.view==='settings'?$('#nav-settings'):$('#nav-surveys')).setAttribute('aria-current','page');
+  updatePill();
+  $('#main').innerHTML = state.view==='home'?viewHome(): state.view==='templates'?viewTemplates(): state.view==='billing'?viewBilling(): state.view==='settings'?viewSettings(): state.view==='build'?(state.step===1?viewAudience():state.step===2?viewBuilder():viewPay()): viewResults();
+}
+function newDraft(t){ state.smart={text:'',busy:false,result:null}; state.moreOpen=false; return {name:t?t.name:'Untitled survey', qs:t?clone(t.qs):[], n:200, reward:null, capPct:settings.defaults.capPct, screener:null, aud:{ages:[], gender:'Everyone', region:'All US', income:[], employment:[], kids:'Any', shopping:'Any', excludePast:false}}; }
+
+document.addEventListener('click', e=>{
+  const t=e.target.closest('button, tr[data-id]'); if(!t) return;
+  if(t.matches('tr[data-id]')){ const s=surveys.find(x=>x.id===t.dataset.id);
+    if(s.status==='draft'){ state.draft=newDraft({name:s.name, qs:s.qs}); state.draft.aud.ages=[]; state.step=1; state.tab='elements'; go('build'); } else openResults(s.id); return; }
+  const id=t.id; const d=state.draft;
+  if(id==='nav-surveys'||id==='back-home') return go('home');
+  if(id==='nav-billing'||id==='bal-pill') return go('billing');
+  if(id==='nav-settings'){ state.confirmDelete=false; return go('settings'); }
+  if(id==='new-survey') return go('templates');
+  if(t.dataset.tpl){ state.draft=newDraft(t.dataset.tpl==='blank'?null:TEMPLATES.find(x=>x.id===t.dataset.tpl)); state.step=1; state.tab=t.dataset.tpl==='blank'?'ai':'elements'; state.parsed=null; state.importText=''; state.aiGoal=''; return go('build'); }
+  if(t.dataset.step && t.classList.contains('done')){ state.step=+t.dataset.step; return render(); }
+  if(t.dataset.tab){ state.tab=t.dataset.tab; return render(); }
+  if(t.dataset.elem){ const el=ELEMENTS.find(x=>x.id===t.dataset.elem); addQuestions([el.q],'add'); toast(`Added “${el.label}”`); return render(); }
+  if(id==='imp-parse'){ state.parsed=parseImport(state.importText); return render(); }
+  if(id==='imp-add'){ const r=addQuestions(state.parsed,'add'); state.parsed=null; state.importText=''; toast(`Added ${r.added} question${r.added===1?'':'s'}${r.skipped?` · ${r.skipped} over the limit left out`:''}`); return render(); }
+  if(t.dataset.suggest){ state.aiGoal=t.dataset.suggest; return render(); }
+  if(id==='ai-go'){ state.aiBusy=true; render(); setTimeout(()=>{ const dr=aiDraft(state.aiGoal); const r=addQuestions(dr.qs,state.aiMode); if(state.aiMode==='replace'||d.name==='Untitled survey') d.name=dr.name;
+      state.aiBusy=false; toast(`Drafted ${r.added} questions`); render(); },1100); return; }
+  if(t.dataset.regen){ const q=d.qs[+t.dataset.regen]; const alts=AI_ALTS[q.type]||[q.text]; q.text=alts[(alts.indexOf(q.text)+1)%alts.length]; return render(); }
+  if(t.dataset.addopt){ d.qs[+t.dataset.addopt].options.push(''); return render(); }
+  if(t.dataset.delopt){ const [i,j]=t.dataset.delopt.split(':').map(Number); d.qs[i].options.splice(j,1); return render(); }
+  if(t.dataset.delq){ d.qs.splice(+t.dataset.delq,1); return render(); }
+  if(id==='add-q'){ d.qs.push({type:'single',text:'',options:['','']}); return render(); }
+  if(id==='to-questions'){ state.step=2; return render(); }
+  if(id==='back-aud2'||id==='back-aud3'){ state.step=1; return render(); }
+  if(id==='back-home2') return go('home');
+  if(t.dataset.smartex){ state.smart.text=t.dataset.smartex; return render(); }
+  if(id==='smart-go'){ state.smart.busy=true; render(); setTimeout(()=>{ const r=smartParse(state.smart.text); applySmart(d,r); state.smart.result=r; state.smart.busy=false; render(); },900); return; }
+  if(id==='smart-scr'){ const r=state.smart.result.screener; d.screener={type:'yesno', text:r.text, keep:[0], screener:true}; toast('Screener added'); return render(); }
+  if(id==='add-scr'){ d.screener={type:'yesno', text:'', keep:[0], screener:true}; return render(); }
+  if(id==='scr-remove'){ d.screener=null; return render(); }
+  if(id==='more-toggle'){ state.moreOpen=!state.moreOpen; return render(); }
+  if(t.dataset.af){ const k=t.dataset.af, v=t.dataset.v, a=d.aud; if(Array.isArray(a[k])){ const ix=a[k].indexOf(v); ix>=0?a[k].splice(ix,1):a[k].push(v); } else a[k]=v; return render(); }
+  if(t.dataset.age){ const a=d.aud.ages, x=t.dataset.age; const k=a.indexOf(x); k>=0?a.splice(k,1):a.push(x); a.sort((p,q)=>AGES.indexOf(p)-AGES.indexOf(q)); return render(); }
+  if(t.dataset.gender){ d.aud.gender=t.dataset.gender; return render(); }
+  if(id==='to-pay'){ if(!d.reward||d.reward<minReward(d.qs)) d.reward=minReward(d.qs)+settings.defaults.rewardBump; state.step=3; return render(); }
+  if(id==='back-aud'){ state.step=2; return render(); }
+  if(id==='n-dec'||id==='n-inc'){ d.n=Math.min(2000,Math.max(50,d.n+(id==='n-inc'?50:-50))); return render(); }
+  if(id==='r-dec'||id==='r-inc'){ d.reward=Math.min(5,Math.max(minReward(d.qs),+(d.reward+(id==='r-inc'?0.25:-0.25)).toFixed(2))); return render(); }
+  if(id==='launch') return runReview();
+  if(t.dataset.qi){ state.qi=+t.dataset.qi; return render(); }
+  if(id==='q-prev'){ state.qi--; return render(); }
+  if(id==='q-next'){ state.qi++; return render(); }
+  if(t.dataset.report){ state.reported[t.dataset.report]=true; toast('Reported. We’ll review it within 2 business days.'); return render(); }
+  if(id==='export') return toast('CSV export is off in this prototype');
+  if(id==='share'){ const url='https://reply.mapier.ai/r/'+state.resultsId; try{ navigator.clipboard.writeText(url).then(()=>toast('Link copied'),()=>toast(url)); }catch(_){ toast(url); } return; }
+  if(id==='topup-open'){ state.topupOpen=true; state.payWith=wallet.methods.find(m=>m.main).id; return render(); }
+  if(id==='topup-cancel'){ state.topupOpen=false; return render(); }
+  if(t.dataset.amt){ state.topupAmt=+t.dataset.amt; return render(); }
+  if(id==='topup-go'){ wallet.available+=state.topupAmt; txns.unshift({date:'Today', desc:'Top-up', survey:'—', amt:state.topupAmt, receipt:true}); state.topupOpen=false; toast(`Added ${fmt$(state.topupAmt)} to your balance from ${(wallet.methods.find(m=>m.id===state.payWith)||wallet.methods[0]).brand}`); return render(); }
+  if(t.dataset.receipt) return toast('Receipts download as PDF in the live product');
+  if(id==='card-edit') return toast('Card changes aren’t part of this prototype');
+  if(t.dataset.paywith){ state.payWith=t.dataset.paywith; return render(); }
+  if(t.dataset.pmMain){ wallet.methods.forEach(m=>{m.main=m.id===t.dataset.pmMain; if(m.main) m.backup=false;}); toast('Main payment method updated'); return render(); }
+  if(t.dataset.pmBackup){ wallet.methods.forEach(m=>{ if(!m.main) m.backup=m.id===t.dataset.pmBackup; }); toast('Backup payment method updated'); return render(); }
+  if(t.dataset.pmRemove){ const m=wallet.methods.find(x=>x.id===t.dataset.pmRemove); if(wallet.methods.length<=1) return toast('Add another payment method before removing this one');
+    if(m.main){ const next=wallet.methods.find(x=>x.id!==m.id); next.main=true; next.backup=false; } wallet.methods=wallet.methods.filter(x=>x.id!==m.id); toast(`${m.brand} removed`); return render(); }
+  if(id==='pm-add'){ if(!wallet.methods.some(m=>m.id==='a')) wallet.methods.push({id:'a',brand:'Amex',last4:'1005',exp:'02/29'}); toast('Card added. In the live product this opens Stripe’s secure card form.'); return render(); }
+  if(t.dataset.pmWallet){ wallet.methods.push({id:t.dataset.pmWallet.replace(' ','').toLowerCase(), brand:t.dataset.pmWallet}); toast(`${t.dataset.pmWallet} added`); return render(); }
+  if(t.dataset.jump){ const el=document.getElementById('set-'+t.dataset.jump); if(el) el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth', block:'start'}); return; }
+  if(id==='s-email') return toast('Email changes need verification in the live product');
+  if(id==='s-signout') return toast('Signed out of 2 other devices');
+  if(id==='s-export') return toast('We’ll email a download link when your export is ready');
+  if(id==='s-delete'){ state.confirmDelete=true; return render(); }
+  if(id==='s-delete-cancel'){ state.confirmDelete=false; return render(); }
+  if(id==='s-to-billing') return go('billing');
+  if(id==='withdraw') return toast(`Withdrawal request for ${fmt$(wallet.available)} sent to support`);
+});
+document.addEventListener('keydown', e=>{ const tr=e.target.closest && e.target.closest('tr[data-id]'); if(tr && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); tr.click(); } });
+document.addEventListener('input', e=>{
+  const t=e.target, d=state.draft;
+  if(t.id==='survey-name'){ d.name=t.value; return; }
+  if(t.id==='smart-text'){ state.smart.text=t.value; const b=$('#smart-go'); if(b) b.disabled=!t.value.trim()||state.smart.busy; return; }
+  if(t.id==='scr-text'){ d.screener.text=t.value; const b=$('#to-questions'); if(b) b.disabled=!t.value.trim()||!d.screener.keep.length; return; }
+  if(t.id==='imp-text'){ state.importText=t.value; const b=$('#imp-parse'); if(b) b.disabled=!t.value.trim(); return; }
+  if(t.id==='ai-goal'){ state.aiGoal=t.value; const b=$('#ai-go'); if(b) b.disabled=!t.value.trim()||state.aiBusy; return; }
+  if(t.dataset.qt!==undefined){ d.qs[+t.dataset.qt].text=t.value; refreshBuilderSide(); return; }
+  if(t.dataset.o!==undefined){ d.qs[+t.dataset.q].options[+t.dataset.o]=t.value; refreshBuilderSide(); return; }
+});
+document.addEventListener('change', e=>{
+  const t=e.target, d=state.draft;
+  if(t.id==='imp-file' && t.files[0]){ const r=new FileReader(); r.onload=()=>{ state.parsed=parseCSV(String(r.result)); render(); }; r.readAsText(t.files[0]); return; }
+  if(t.name==='aimode'){ state.aiMode=t.value; return; }
+  if(t.dataset.type!==undefined){ const q=d.qs[+t.dataset.type]; q.type=t.value; if((q.type==='single'||q.type==='multi')&&!q.options) q.options=['','']; if(!(q.type==='single'||q.type==='multi')) delete q.options; return render(); }
+  if(t.id==='region'){ d.aud.region=t.value; return render(); }
+  if(t.id==='ex-past'){ d.aud.excludePast=t.checked; return render(); }
+  if(t.dataset.scrkeep!==undefined){ const j=+t.dataset.scrkeep, k=d.screener.keep.indexOf(j); t.checked?(k<0&&d.screener.keep.push(j)):(k>=0&&d.screener.keep.splice(k,1)); return render(); }
+  if(t.id==='at-on'){ wallet.autoTopup.on=t.checked; toast(t.checked?`Auto top-up on: add $${wallet.autoTopup.amt} below $${wallet.autoTopup.below}`:'Auto top-up off'); return render(); }
+  if(t.id==='at-below'||t.id==='at-amt'){ wallet.autoTopup[t.id==='at-below'?'below':'amt']=+t.value; toast('Saved'); return render(); }
+  if(t.dataset.set){ let v=t.type==='checkbox'?t.checked:t.value; if(t.tagName==='SELECT' && v!=='' && !isNaN(+v) && t.dataset.set!=='retention') v=+v; settings.set(t.dataset.set,v); toast('Saved'); return render(); }
+  if(t.name==='signin'||t.name==='sender'){ settings[t.name]=t.value; toast('Saved'); return render(); }
+  if(t.dataset.bd){ wallet.details[t.dataset.bd]=t.value; toast('Saved'); return; }
+  if(t.id==='cap'){ d.capPct=+t.value; return render(); }
+  if(t.dataset.keep!==undefined){ const j=+t.dataset.keep, k=d.aud.keep.indexOf(j); t.checked?(k<0&&d.aud.keep.push(j)):(k>=0&&d.aud.keep.splice(k,1)); return render(); }
+  if(t.id==='n'){ d.n=Math.min(2000,Math.max(50,Math.round((+t.value||50)/50)*50)); return render(); }
+  if(['Age','Gender','Region'].includes(t.id)){ const map={Age:'age',Gender:'gender',Region:'region'}; state.filter[map[t.id]]=t.value; return render(); }
+});
+function refreshBuilderSide(){
+  const ph=document.querySelector('.phone'); if(ph) ph.innerHTML=phoneThread(state.draft);
+  const p=problems(state.draft); const btn=$('#to-pay'); if(btn) btn.disabled=!!p.length;
+  let w=document.querySelector('.builder .warn-text'); if(p.length){ if(!w&&btn){ w=document.createElement('div'); w.className='warn-text'; btn.parentElement.before(w);} if(w) w.textContent=p[0]; } else if(w) w.remove();
+}
+render();
+})();
+</script>
+</body>
+</html>
