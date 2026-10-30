@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Opus prototype — Rebecca Wu</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Courier+Prime&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#F4EFE8;
+  --app:#141414;
+  --panel:#1E1E1E;
+  --panel-2:#262626;
+  --chat:#2B2B2B;
+  --line:#2F2F2F;
+  --text:#EDEDED;
+  --muted:#9A9A9A;
+  --faint:#6E6E6E;
+  --accent:#F2703C;
+  --accent-soft:rgba(242,112,60,.14);
+  --user:#6E5B49;
+  --ok:#4CC38A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);font-family:Inter,system-ui,sans-serif;color:var(--text);padding:32px 16px;-webkit-font-smoothing:antialiased}
+.frame{max-width:1280px;margin:0 auto;border-radius:14px;overflow:hidden;background:var(--app);box-shadow:0 24px 60px rgba(60,40,20,.18),0 0 0 1px rgba(0,0,0,.06)}
+.chrome{height:36px;background:#0E0E0E;display:flex;align-items:center;gap:8px;padding:0 14px}
+.dot{width:11px;height:11px;border-radius:50%}
+.url{margin-left:14px;flex:1;max-width:420px;height:22px;border-radius:6px;background:#1C1C1C;color:var(--faint);font-size:11px;display:flex;align-items:center;padding:0 10px}
+/* top bar */
+.top{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.close{width:28px;height:28px;border-radius:50%;background:var(--panel-2);display:grid;place-items:center;color:var(--muted);font-size:13px}
+.title b{display:block;font-size:13px;font-weight:500}
+.title span{font-size:11px;color:var(--accent)}
+.top .sp{flex:1}
+.pill{font-size:11px;color:var(--muted);background:var(--panel-2);border-radius:999px;padding:4px 10px;display:flex;align-items:center;gap:6px}
+.pill i{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.icon-btn{font-size:11px;color:var(--muted);padding:4px 8px}
+/* layout */
+.body{display:grid;grid-template-columns:150px 1fr 330px;height:760px}
+.rail{padding:24px 0 0 22px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.step{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);cursor:pointer;background:none;border:0;text-align:left;font-family:inherit}
+.step .c{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--faint);display:grid;place-items:center;font-size:9px;flex-shrink:0}
+.step.done .c{border-color:var(--accent);color:var(--accent)}
+.step.active{color:var(--text)}
+.step.active .c{border-color:var(--accent);background:var(--accent-soft)}
+.step.active .c::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.step:hover{color:var(--text)}
+.doc{overflow-y:auto;padding:24px 28px 40px;scroll-behavior:smooth}
+.doc::-webkit-scrollbar{width:6px}.doc::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+section{padding-bottom:28px;margin-bottom:28px;border-bottom:1px solid var(--line)}
+section:last-child{border:0}
+h2{font-size:19px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.tags{display:flex;gap:8px;margin-bottom:18px}
+.tag{font-size:11px;background:var(--panel-2);border-radius:6px;padding:5px 9px;color:#CFCFCF}
+.field{margin-bottom:12px}
+.field small{display:block;font-size:10px;letter-spacing:.06em;color:var(--faint);margin-bottom:3px}
+.field p{font-size:13px;line-height:1.55}
+.field ul{padding-left:18px;font-size:13px;line-height:1.7}
+.script{background:#181818;border-radius:10px;padding:16px 18px;font-family:"Courier Prime",monospace;font-size:12px;line-height:1.6;color:#BDBDBD}
+.script .meta{text-align:center;color:var(--faint);font-size:11px;margin-bottom:12px}
+.script .scene{display:flex;justify-content:space-between;color:var(--text);font-weight:700;margin-bottom:10px}
+.script .tc{color:var(--faint);font-size:11px;margin-top:10px}
+.script .who{text-align:center;color:var(--text);margin-top:8px}
+.script .line{margin:0 auto;max-width:440px}
+.approve{margin-top:14px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.btn{font-family:inherit;font-size:12px;font-weight:500;border:0;border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.ghost{background:var(--panel-2);color:var(--text)}
+.btn.done{background:rgba(76,195,138,.15);color:var(--ok);cursor:default}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card svg{width:100%;aspect-ratio:1;border-radius:8px;display:block}
+.card b{display:block;font-size:12px;font-weight:500;margin-top:7px}
+.card span{font-size:11px;color:var(--faint)}
+.clips{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.clips svg{width:100%;aspect-ratio:16/9;border-radius:8px;display:block}
+.player{position:relative;border-radius:10px;overflow:hidden}
+.player svg{width:100%;display:block;aspect-ratio:16/9}
+.ctrl{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;display:flex;align-items:center;gap:10px;background:linear-gradient(transparent,rgba(0,0,0,.55));font-size:11px}
+.play{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.9);border:0;cursor:pointer;color:#111;font-size:10px}
+.bar{flex:1;height:3px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s linear}
+.dl{margin-top:10px;display:flex;align-items:center;gap:12px;background:var(--panel);border-radius:10px;padding:10px 12px}
+.dl .ic{width:34px;height:34px;border-radius:8px;background:var(--panel-2);display:grid;place-items:center;color:var(--muted)}
+.dl div b{font-size:12px;font-weight:500;display:block}
+.dl div span{font-size:11px;color:var(--muted)}
+.dl .btn{margin-left:auto;background:#fff;color:#111}
+/* chat */
+.chat{margin:12px 12px 12px 0;background:var(--chat);border-radius:14px;display:flex;flex-direction:column;overflow:hidden}
+.chat-head{padding:12px 14px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;border-bottom:1px solid #353535}
+.avatar{width:20px;height:20px;border-radius:6px;background:var(--accent);display:grid;place-items:center;font-size:10px;color:#fff;font-weight:600}
+.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;font-size:12.5px;line-height:1.55}
+.msgs::-webkit-scrollbar{width:4px}.msgs::-webkit-scrollbar-thumb{background:#444}
+.u{align-self:flex-end;background:var(--user);padding:8px 12px;border-radius:12px 12px 4px 12px;max-width:85%}
+.a{color:#D6D6D6}
+.a ul{padding-left:16px;margin-top:4px}
+.task{background:#232323;border-radius:10px;padding:10px 12px;font-size:12px}
+.task div{display:flex;align-items:center;gap:8px;padding:3px 0;color:var(--muted)}
+.task div.ok{color:#D6D6D6}
+.task div.ok::before{content:"✓";color:var(--accent);font-size:11px}
+.task div.run::before{content:"";width:9px;height:9px;border:1.5px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;border:1px solid #444;border-radius:999px;padding:4px 9px;color:#CFCFCF;background:none;cursor:pointer;font-family:inherit}
+.chip:hover{border-color:var(--accent);color:#fff}
+.input{margin:10px;display:flex;align-items:center;gap:8px;background:#232323;border-radius:12px;padding:6px 6px 6px 12px}
+.input input{flex:1;background:none;border:0;outline:0;color:var(--text);font-family:inherit;font-size:12.5px}
+.input input::placeholder{color:var(--faint)}
+.send{width:28px;height:28px;border-radius:50%;border:0;background:var(--accent);color:#fff;cursor:pointer;font-size:13px}
+.hint{text-align:center;font-size:10px;color:var(--faint);padding:0 0 10px}
+.editable{position:relative;cursor:pointer}
+.editable .ov{position:absolute;top:0;left:0;right:0;aspect-ratio:var(--ar,1);border-radius:8px;background:rgba(20,20,20,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:11px;font-weight:500;color:#fff}
+.editable .ov span{background:var(--accent);padding:5px 10px;border-radius:999px}
+.editable:hover .ov,.editable.picked .ov{opacity:1}
+.editable.picked svg{outline:2px solid var(--accent);outline-offset:2px}
+.edit-video{position:absolute;top:10px;right:10px;font-family:inherit;font-size:11px;font-weight:500;border:0;border-radius:999px;padding:5px 10px;background:rgba(20,20,20,.7);color:#fff;cursor:pointer}
+.edit-video:hover{background:var(--accent)}
+.player.picked{outline:2px solid var(--accent);outline-offset:2px}
+.attach-wrap{margin:10px 10px 0;display:none}
+.attach-wrap.on{display:flex}
+.att{display:flex;align-items:center;gap:8px;background:#1F1F1F;border:1px solid var(--accent);border-radius:10px;padding:5px 8px 5px 5px;font-size:11.5px;animation:pop .25s ease}
+.att svg{width:34px;height:34px;border-radius:6px;object-fit:cover}
+.att small{display:block;font-size:10px;color:var(--muted)}
+.att button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;margin-left:6px}
+@keyframes pop{from{transform:translateY(6px);opacity:0}}
+.input.has-att{margin-top:6px}
+.u .ref{display:flex;align-items:center;gap:6px;font-size:11px;color:#EADFD3;margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.15)}
+.u .ref svg{width:26px;height:26px;border-radius:4px}
+.caption{max-width:1280px;margin:14px auto 0;font-size:12px;color:#8A7A6A;text-align:center}
+@media (max-width:980px){
+  .body{grid-template-columns:1fr;height:auto}
+  .rail{flex-direction:row;flex-wrap:wrap;padding:14px 16px;gap:14px}
+  .doc{max-height:none;overflow:visible;padding:16px}
+  .chat{margin:0 12px 12px;height:520px}
+  .clips{grid-template-columns:1fr 1fr}
+  .top .icon-btn{display:none}
+}
+.embedded body{background:transparent;padding:4px 4px 28px}
+.embedded .caption{display:none}
+</style>
+<script>if(window.self!==window.top)document.documentElement.classList.add('embedded')</script>
+</head>
+<body>
+<div class="frame">
+  <div class="chrome">
+    <span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span>
+    <div class="url">agent.opus.pro / montage</div>
+  </div>
+
+  <div class="top">
+    <div class="close">✕</div>
+    <div class="title"><b>Hearthside Bakery · Sunday Rise</b><span id="status">Rendering clip 3 of 3…</span></div>
+    <div class="sp"></div>
+    <div class="pill"><i></i>Agent working</div>
+    <span class="icon-btn">Feedback</span><span class="icon-btn">Share</span><span class="icon-btn">History</span>
+  </div>
+
+  <div class="body">
+    <nav class="rail" id="rail">
+      <button class="step done" data-t="summary"><span class="c">✓</span>Summary</button>
+      <button class="step done" data-t="screenplay"><span class="c">✓</span>Screenplay</button>
+      <button class="step done" data-t="references"><span class="c">✓</span>References</button>
+      <button class="step active" data-t="clips"><span class="c"></span>Clips</button>
+      <button class="step" data-t="video"><span class="c"></span>Video</button>
+    </nav>
+
+    <main class="doc" id="doc">
+      <section id="summary">
+        <h2>Summary</h2>
+        <div class="tags"><span class="tag">▭ 9:16</span><span class="tag">◷ ~30s</span><span class="tag">▤ Social ad</span></div>
+        <div class="field"><small>VISUAL STYLE</small><p>Cozy, golden-hour bakery with warm terracotta and cream tones, soft steam and flour in the light</p></div>
+        <div class="field"><small>STORYTELLING</small><p>Mascot-led narrative: Pip the fox opens the shop at dawn, shows the bake, and invites viewers in for Sunday brunch</p></div>
+        <div class="field"><small>TONE</small><p>Warm, playful, neighborly</p></div>
+        <div class="field"><small>PURPOSE</small><p>Drive weekend foot traffic for a neighborhood bakery's new Sunday brunch</p></div>
+        <div class="field"><small>REQUIREMENTS</small><ul><li>Pip's voiceover must match the approved script word-for-word</li><li>Bakery storefront must stay consistent across every shot</li></ul></div>
+      </section>
+
+      <section id="screenplay">
+        <h2>Screenplay</h2>
+        <div class="script">
+          <div class="meta">1 scene · 3 clips · 00:30</div>
+          <div class="scene"><span>1. HEARTHSIDE BAKERY — DAWN</span><span>00:00–00:30</span></div>
+          <div class="tc">00:00–00:10</div>
+          <p>Slow push-in on the shopfront as the lights flick on. Pip, a small fox in a cream apron, flips the sign to OPEN and grins at the lens.</p>
+          <div class="who">PIP THE FOX</div>
+          <p class="line">Morning, neighbor. You're up early — good. The good stuff goes fast.</p>
+          <div class="tc">00:10–00:22</div>
+          <p>Close-up orbit around the counter: croissants lifted from the oven, steam curling through the window light.</p>
+          <div class="who">PIP THE FOX</div>
+          <p class="line">Every Sunday, we bake it all from scratch. Butter, patience, and a little too much cinnamon.</p>
+          <div class="tc">00:22–00:30</div>
+          <p>Pull back to the doorway; Pip holds up a warm pastry as the logo resolves.</p>
+          <div class="who">PIP THE FOX</div>
+          <p class="line">Sunday brunch at Hearthside. Come hungry.</p>
+        </div>
+        <div class="approve"><button class="btn done">✓ Approved</button>Locked by you · lines will be lip-synced exactly</div>
+      </section>
+
+      <section id="references">
+        <h2>References</h2>
+        <div class="grid">
+          <div class="card">
+            <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#E9B98A"/><rect y="62" width="100" height="38" fill="#B9774E"/><rect x="18" y="28" width="64" height="44" rx="3" fill="#F6E3C8"/><rect x="24" y="22" width="52" height="10" rx="2" fill="#7A3E2A"/><rect x="28" y="40" width="18" height="32" fill="#7A3E2A"/><rect x="52" y="40" width="22" height="16" fill="#FFD27A"/></svg>
+            <b>Hearthside storefront</b><span>Environment</span>
+          </div>
+          <div class="card">
+            <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#F3EEE7"/><polygon points="30,30 38,12 46,32" fill="#E07A3F"/><polygon points="54,32 62,12 70,30" fill="#E07A3F"/><ellipse cx="50" cy="46" rx="22" ry="18" fill="#E07A3F"/><polygon points="50,62 38,48 62,48" fill="#FFF4E6"/><circle cx="42" cy="44" r="2.6" fill="#222"/><circle cx="58" cy="44" r="2.6" fill="#222"/><circle cx="50" cy="55" r="2" fill="#222"/><rect x="34" y="64" width="32" height="28" rx="6" fill="#F6E3C8"/></svg>
+            <b>Pip the Fox</b><span>Character</span>
+          </div>
+          <div class="card">
+            <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#3B2A22"/><ellipse cx="50" cy="66" rx="34" ry="8" fill="#5B4033"/><path d="M28 62 Q50 36 72 62 Z" fill="#E8A65A"/><path d="M36 60 Q50 44 64 60" stroke="#C9813C" stroke-width="2" fill="none"/><path d="M44 30 q4 -6 0 -12 M54 30 q4 -6 0 -12" stroke="#BFB3A6" stroke-width="1.5" fill="none" opacity=".7"/></svg>
+            <b>Signature croissant</b><span>Product</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="clips">
+        <h2>Clips <span class="tag" style="font-weight:400">2 of 3 ready</span></h2>
+        <div class="clips">
+          <div><svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#E9B98A"/><rect y="58" width="160" height="32" fill="#B9774E"/><rect x="40" y="18" width="80" height="48" rx="3" fill="#F6E3C8"/><rect x="48" y="12" width="64" height="10" rx="2" fill="#7A3E2A"/><polygon points="88,40 92,32 96,41" fill="#E07A3F"/><polygon points="100,41 104,32 108,40" fill="#E07A3F"/><ellipse cx="98" cy="48" rx="11" ry="9" fill="#E07A3F"/></svg><p style="font-size:11px;color:var(--muted);margin-top:5px">Clip 1 · Opening</p></div>
+          <div><svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#3B2A22"/><rect y="60" width="160" height="30" fill="#5B4033"/><path d="M50 60 Q80 30 110 60 Z" fill="#E8A65A"/><path d="M70 30 q4 -6 0 -12 M88 30 q4 -6 0 -12" stroke="#BFB3A6" stroke-width="1.5" fill="none" opacity=".7"/></svg><p style="font-size:11px;color:var(--muted);margin-top:5px">Clip 2 · The bake</p></div>
+          <div><svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#262626"/><circle cx="80" cy="42" r="9" fill="none" stroke="#F2703C" stroke-width="2" stroke-dasharray="40 20"><animateTransform attributeName="transform" type="rotate" from="0 80 42" to="360 80 42" dur="1s" repeatCount="indefinite"/></circle><text x="80" y="70" fill="#9A9A9A" font-size="8" text-anchor="middle" font-family="Inter">Rendering…</text></svg><p style="font-size:11px;color:var(--muted);margin-top:5px">Clip 3 · Invitation</p></div>
+        </div>
+      </section>
+
+      <section id="video">
+        <h2>Video <span class="tag" style="font-weight:400">◷ History</span></h2>
+        <div class="player">
+          <svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#E9B98A"/><rect y="58" width="160" height="32" fill="#B9774E"/><rect x="40" y="18" width="80" height="48" rx="3" fill="#F6E3C8"/><rect x="48" y="12" width="64" height="10" rx="2" fill="#7A3E2A"/><text x="80" y="19.5" fill="#F6E3C8" font-size="5" text-anchor="middle" font-family="Inter" font-weight="600">HEARTHSIDE</text><rect x="52" y="30" width="18" height="36" fill="#7A3E2A"/><rect x="76" y="30" width="36" height="20" fill="#FFD27A"/><polygon points="88,48 92,40 96,49" fill="#E07A3F"/><polygon points="100,49 104,40 108,48" fill="#E07A3F"/><ellipse cx="98" cy="56" rx="11" ry="9" fill="#E07A3F"/><circle cx="94" cy="55" r="1.2" fill="#222"/><circle cx="102" cy="55" r="1.2" fill="#222"/></svg>
+          <div class="ctrl"><button class="play" id="play">▶</button><span id="time">00:00 / 00:30</span><div class="bar"><i id="prog"></i></div></div>
+        </div>
+        <div class="dl"><div class="ic">▣</div><div><b>Final video</b><span id="dlnote">Assembles automatically when all clips are ready</span></div><button class="btn" id="dlbtn">Download</button></div>
+      </section>
+    </main>
+
+    <aside class="chat">
+      <div class="chat-head"><span class="avatar">A</span>Agent Opus</div>
+      <div class="msgs" id="msgs">
+        <div class="u">Make a 30s vertical ad for my bakery's new Sunday brunch. Our mascot is Pip the fox — cozy and playful.</div>
+        <div class="a">Love it. Here's the plan before I start:<ul><li>Format: 9:16, ~30s, social ad</li><li>Pip narrates, storefront stays consistent</li><li>3 clips: opening → the bake → invitation</li></ul></div>
+        <div class="a">I drafted the screenplay. Want to review the lines before I lock lip-sync?</div>
+        <div class="u">Looks great — approve it.</div>
+        <div class="task">
+          <div class="ok">Summary &amp; creative brief</div>
+          <div class="ok">Screenplay approved</div>
+          <div class="ok">Character + storefront references</div>
+          <div class="ok">Clips 1–2 rendered</div>
+          <div class="run" id="runline">Rendering clip 3</div>
+        </div>
+        <div class="a">While clip 3 renders, anything you'd like to adjust?</div>
+        <div class="chips" id="chips">
+          <button class="chip">Make Pip's voice warmer</button>
+          <button class="chip">Add a price callout</button>
+          <button class="chip">Try a 16:9 version</button>
+        </div>
+      </div>
+      <div class="attach-wrap" id="attach"></div>
+      <form class="input" id="form"><input id="inp" placeholder="Chat with Agent Opus" autocomplete="off"><button class="send" aria-label="Send">↑</button></form>
+      <div class="hint">Ask the agent to change anything, any time</div>
+    </aside>
+  </div>
+</div>
+<p class="caption">Agent Opus · agentic text-to-video workflow (concept mockup with sample content)</p>
+
+<script>
+const doc=document.getElementById('doc');
+document.querySelectorAll('.step').forEach(s=>s.addEventListener('click',()=>{
+  const t=document.getElementById(s.dataset.t);
+  if(window.innerWidth>980){doc.scrollTo({top:t.offsetTop-doc.offsetTop-16,behavior:'smooth'})}else{t.scrollIntoView({behavior:'smooth'})}
+}));
+const msgs=document.getElementById('msgs');
+function add(cls,text){const d=document.createElement('div');d.className=cls;d.textContent=text;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight}
+function reply(q){setTimeout(()=>add('a','On it — I\'ll update the brief and re-render only the affected clips for "'+q+'". Everything else stays as approved.'),700)}
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{add('u',c.textContent);reply(c.textContent)}));
+let picked=null;
+const attachBox=document.getElementById('attach'),inp=document.getElementById('inp'),form=document.getElementById('form');
+function clearPick(){picked=null;attachBox.className='attach-wrap';attachBox.innerHTML='';form.classList.remove('has-att');inp.placeholder='Chat with Agent Opus';document.querySelectorAll('.editable.picked').forEach(e=>e.classList.remove('picked'))}
+function pick(el,name,kind){
+  clearPick();
+  picked={name,kind,svg:el.querySelector('svg').outerHTML};
+  el.classList.add('picked');
+  attachBox.innerHTML='<div class="att">'+picked.svg+'<div><b>'+name+'</b><small>'+kind+' attached</small></div><button type="button" aria-label="Remove">✕</button></div>';
+  attachBox.querySelector('button').onclick=clearPick;
+  attachBox.className='attach-wrap on';form.classList.add('has-att');
+  inp.placeholder='What should change in '+name+'?';inp.focus();
+}
+document.querySelectorAll('#references .card').forEach(c=>{c.classList.add('editable');c.insertAdjacentHTML('beforeend','<div class="ov"><span>✎ Edit</span></div>');c.onclick=()=>pick(c,c.querySelector('b').textContent,'Reference')});
+document.querySelectorAll('.clips > div').forEach(c=>{c.classList.add('editable');c.style.setProperty('--ar','16/9');c.insertAdjacentHTML('beforeend','<div class="ov"><span>✎ Edit</span></div>');c.onclick=()=>pick(c,c.querySelector('p').textContent.split(' · ')[0],'Clip')});
+const player=document.querySelector('.player');
+player.insertAdjacentHTML('beforeend','<button class="edit-video" type="button">✎ Edit video</button>');
+player.querySelector('.edit-video').onclick=()=>pick(player,'Final video','Video');
+form.addEventListener('submit',e=>{
+  e.preventDefault();const v=inp.value.trim();if(!v)return;
+  const d=document.createElement('div');d.className='u';
+  if(picked){d.innerHTML='<div class="ref">'+picked.svg+'<span>'+picked.name+'</span></div>'}
+  d.appendChild(document.createTextNode(v));msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+  const target=picked?picked.name:null;inp.value='';clearPick();
+  setTimeout(()=>add('a',target?'Got it — editing '+target+' only: "'+v+'". Everything else stays as approved; I\'ll re-render just what depends on it.':'On it — I\'ll update the brief and re-render only the affected clips. Everything else stays as approved.'),700);
+});
+setTimeout(()=>{
+  const c3=document.querySelectorAll('.clips svg')[2];
+  c3.outerHTML='<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#E9B98A"/><rect y="58" width="160" height="32" fill="#B9774E"/><rect x="62" y="20" width="36" height="46" fill="#7A3E2A"/><polygon points="70,34 74,26 78,35" fill="#E07A3F"/><polygon points="82,35 86,26 90,34" fill="#E07A3F"/><ellipse cx="80" cy="42" rx="11" ry="9" fill="#E07A3F"/><path d="M92 52 Q100 44 108 52 Z" fill="#E8A65A"/></svg>';
+  document.querySelector('#clips .tag').textContent='3 of 3 ready';
+  const r=document.getElementById('runline');r.className='ok';r.textContent='All clips rendered · video assembled';
+  document.querySelector('[data-t=clips]').className='step done';document.querySelector('[data-t=clips] .c').textContent='✓';
+  const v=document.querySelector('[data-t=video]');v.className='step done';v.querySelector('.c').textContent='✓';
+  document.getElementById('status').textContent='Your video is ready!';
+  document.querySelector('.pill').innerHTML='<i style="background:#4CC38A;animation:none"></i>Ready';
+  document.getElementById('dlnote').textContent='Ready to watch or download';
+  add('a','Your Sunday brunch ad is ready 🎉 Watch it in the Video section, or tell me what to tweak.');
+},6000);
+let playing=false,t=0,timer;
+document.getElementById('play').addEventListener('click',function(){
+  playing=!playing;this.textContent=playing?'❚❚':'▶';
+  if(playing){timer=setInterval(()=>{t=(t+.2)%30;document.getElementById('prog').style.width=(t/30*100)+'%';const s=Math.floor(t);document.getElementById('time').textContent='00:'+String(s).padStart(2,'0')+' / 00:30'},200)}else clearInterval(timer);
+});
+</script>
+</body>
+</html>

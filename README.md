@@ -10,6 +10,7 @@ favicon.svg
 assets/photos/      photographs (resized for the web, location metadata removed)
 assets/video/       product demo clips + poster frames
 mapier/index.html   Mapier Reply clickable prototype (linked from the Products section)
+agent-opus/index.html  Agent Opus interactive prototype (embedded in the #playground section)
 ```
 
 ## Preview locally
