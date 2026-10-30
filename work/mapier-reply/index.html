@@ -14,35 +14,45 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../styles.css">
+<script src="../../site.js" defer></script>
 </head>
 <body>
-<div class="page">
-<header class="top">
-<a class="brand" href="../../"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l6-9 4 6 3-4 5 7z"></path><circle cx="17" cy="6" r="2"></circle></svg>Rebecca Wu</a>
-<nav aria-label="Main">
-<a href="../../#about">About</a>
-<a href="../../#products" aria-current="page">Products</a>
+<div class="page shell">
+<aside class="sb" id="sb">
+<div class="sb-head">
+<a class="sb-brand" href="../../"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l6-9 4 6 3-4 5 7z"></path><circle cx="17" cy="6" r="2"></circle></svg>Rebecca Wu</a>
+<p class="sb-tag">Product builder, tech-savvy hacker and freelance photographer.</p>
+</div>
+<button class="sb-toggle" type="button" aria-expanded="false" aria-controls="sb-nav">Menu</button>
+<nav class="sb-nav" id="sb-nav" aria-label="Main">
+<a href="../../">Home</a>
+<a href="../../about/">About</a>
+<a href="../../process/">How I work</a>
+<a href="../../products/" aria-current="page">Products</a>
+<ul class="sb-sub"><li><a href="../../work/agent-opus/"><span>01</span>Agent Opus</a></li><li><a href="../../work/eval-platform/"><span>02</span>Agent eval platform</a></li><li><a href="../../work/auto-sfx/"><span>03</span>Auto sound effects</a></li><li><a href="../../work/eye-contact/"><span>04</span>Eye contact correction</a></li><li><a href="../../work/mapier-reply/" aria-current="page"><span>05</span>Mapier Reply</a></li></ul>
 <a href="../../photographs/">Photographs</a>
-<a href="../../assets/Rebecca-Wu-Resume.pdf" target="_blank" rel="noopener">Resume</a>
-<a class="pill" href="#contact">Contact</a>
+<a href="../../contact/">Contact</a>
 </nav>
-</header>
-<main>
-<div class="wrap">
-<a class="crumb" href="../../#products"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>All products</a>
-<div class="p-head">
-<div>
+<div class="sb-foot">
+<a href="../../assets/Rebecca-Wu-Resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+<a href="https://www.linkedin.com/in/rebecca-wu-uchicago/" target="_blank" rel="noopener">LinkedIn ↗</a>
+<a href="mailto:rebeccawuruochun@gmail.com">rebeccawuruochun@gmail.com</a>
+</div>
+</aside>
+<main class="main">
+<div class="wrap pj">
+<a class="crumb" href="../../products/"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>All products</a>
+<div class="pj-grid">
+<div class="pj-text">
 <p class="p-eyebrow rw-rise">05 · SIDE PROJECT · MAPIER LABS</p>
 <h1 class="p-title rw-rise d1">Mapier Reply</h1>
 <p class="p-lede rw-rise d2">A customer research pipeline over iMessage, with no external logins or forms. I wrote the PRD and architected the product end to end with the founding engineer. The prototype covers an AI survey builder, automated billing based on respondent engagement, and AI-summarized results.</p>
-</div>
 
+<dl class="p-facts"><div><dt>ROLE</dt><dd>PRD and product architecture</dd></div><div><dt>TEAM</dt><dd>With the founding engineer</dd></div><div><dt>TRY IT</dt><dd><a href="../../mapier/" target="_blank" rel="noopener">Interactive prototype ↗</a></dd></div><div><dt>COMPANY</dt><dd><a href="https://www.mapier.ai/" target="_blank" rel="noopener">mapier.ai ↗</a></dd></div></dl>
+<div class="p-actions"><a class="btn btn-dark" href="../../mapier/" target="_blank" rel="noopener">Try the prototype ↗</a><a class="btn btn-line" href="https://www.mapier.ai/" target="_blank" rel="noopener">mapier.ai ↗</a></div>
 </div>
-</div>
-<div class="p-mat">
-<div class="wrap">
-<figure class="p-print rw-reveal">
-<a href="../../mapier/" target="_blank" rel="noopener" aria-label="Open the Mapier Reply prototype" style="display: flex; justify-content: center; text-decoration: none; background: #E6EEF6; padding: clamp(32px, 6vw, 72px) 16px">
+<figure class="p-print pj-media rw-rise d2">
+<a href="../../mapier/" target="_blank" rel="noopener" aria-label="Open the Mapier Reply prototype" style="display: flex; justify-content: center; text-decoration: none; background: #E6EEF6; padding: clamp(28px, 4vw, 56px) 16px">
 <div style="width: 100%; max-width: 290px; border-radius: 44px; padding: 10px; background: #1D1B20">
 <div style="border-radius: 34px; background: #FFFFFF; padding: 18px 12px 22px; display: flex; flex-direction: column; gap: 6px; font-family: -apple-system, 'Helvetica Neue', sans-serif; font-size: 14px; line-height: 1.35">
 <div style="text-align: center; font-size: 12px; color: #5E5E5E; margin-bottom: 8px"><b style="display: block; color: #2B2B2B; font-size: 13px">Mapier Research</b>iMessage · Today 10:42 AM</div>
@@ -59,34 +69,11 @@
 </figure>
 </div>
 </div>
-<div class="wrap">
-<dl class="p-facts"><div><dt>ROLE</dt><dd>PRD and product architecture</dd></div><div><dt>TEAM</dt><dd>With the founding engineer</dd></div><div><dt>TRY IT</dt><dd><a href="../../mapier/" target="_blank" rel="noopener">Interactive prototype ↗</a></dd></div><div><dt>COMPANY</dt><dd><a href="https://www.mapier.ai/" target="_blank" rel="noopener">mapier.ai ↗</a></dd></div></dl>
-<div class="p-actions"><a class="btn btn-dark" href="../../mapier/" target="_blank" rel="noopener">Try the prototype ↗</a><a class="btn btn-line" href="https://www.mapier.ai/" target="_blank" rel="noopener">mapier.ai ↗</a></div>
-</div>
 <nav class="pn" aria-label="More products">
 <a href="../eye-contact/"><img src="../../assets/video/eye-contact-poster.jpg" alt=""><span><small>Previous</small><strong>Eye contact correction</strong></span></a>
 <a href="../agent-opus/"><img src="../../assets/video/agent-opus-poster.jpg" alt=""><span><small>Next</small><strong>Agent Opus</strong></span></a>
 </nav>
 </main>
-<section id="contact" style="background: #1F2A22; color: #F2F3EE">
-<div style="max-width: 1240px; margin: 0 auto; padding: clamp(100px, 12vw, 150px) clamp(20px, 4vw, 56px) 56px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 26px">
-<p style="margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #AEB8AF">Product roles · Portrait &amp; event shoots</p>
-<h2 style="margin: 0; max-width: 900px; font-size: clamp(40px, 6vw, 84px); line-height: 1.02; font-weight: 300; letter-spacing: -0.04em">Let's make something worth framing.</h2>
-<a href="mailto:rebeccawuruochun@gmail.com" style="display: inline-flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 30px; border-radius: 999px; background: #FFFFFF; color: #1E231F; text-decoration: none; font-weight: 500; font-size: clamp(15px, 1.6vw, 18px); max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere">rebeccawuruochun@gmail.com</a>
-<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px">
-<a href="../../assets/Rebecca-Wu-Resume.pdf" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; border: 1px solid #4E5E52; text-decoration: none; font-weight: 500">Resume (PDF) ↗</a>
-<a href="https://www.linkedin.com/in/rebecca-wu-uchicago/" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; border: 1px solid #4E5E52; text-decoration: none; font-weight: 500">LinkedIn ↗</a>
 </div>
-<div style="width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 80px; padding-top: 24px; border-top: 1px solid #34413A; font-size: 13px; color: #AEB8AF">
-<span>© 2026 Rebecca Wu</span>
-<span>Every photograph on this site is mine</span>
-</div>
-</div>
-</section>
-
-</div>
-<script>
-document.querySelectorAll('video[autoplay]').forEach(function (v) { v.muted = true; var p = v.play(); if (p && p.catch) p.catch(function () {}); });
-</script>
 </body>
 </html>

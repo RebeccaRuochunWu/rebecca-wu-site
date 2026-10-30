@@ -5,15 +5,18 @@ Personal site for Rebecca Wu — product builder, tech-savvy hacker and freelanc
 A plain static site: no framework, no build step. Open `index.html` in a browser to preview it.
 
 ```
-index.html             home: hero, about, how I work, products index, photo teaser, contact
-styles.css             shared styles for every page
+index.html             Home: full-screen photo hero
+about/                 About me
+process/               How I work
+products/              Products list (hover a row for a preview)
 work/<project>/        one page per product (agent-opus, eval-platform, auto-sfx, eye-contact, mapier-reply)
-photographs/           photo collage page
+photographs/           photo collage
+contact/               contact
+styles.css             shared styles, including the left sidebar
+site.js                shared behaviour: sidebar menu on phones, hero slideshow, product previews, video autoplay
 agent-opus/            Agent Opus interactive prototype (embedded on work/agent-opus/)
 mapier/                Mapier Reply interactive prototype
-assets/photos/         photographs (resized for the web, location metadata removed)
-assets/video/          product demo clips + poster frames
-assets/previews/       preview images for products without a video poster
+assets/                photos, demo videos, previews, resume
 favicon.svg
 ```
 
@@ -51,14 +54,15 @@ git push -u origin main
 
 ## Still to fill in
 
-Search `index.html` for `[` to find placeholders:
+Search the HTML files for `[` to find placeholders:
 
 - Instagram link (points to `#` for now)
 
 ## Editing tips
 
-- Copy lives directly in the HTML. Home sections are marked by `id` (`about`, `approach`, `products`, `contact`); each product's text is in `work/<project>/index.html`.
-- The products list on the home page is the `<ul class="pi">` in `index.html`; `data-preview` is the image that floats under the cursor.
-- Shared styles (buttons, project-page layout, products list) are in `styles.css`.
-- To swap a hero photo, replace the file in `assets/photos/` (keep the name) or change the `src` on the `.hero-slide` images; captions are in the script at the bottom.
+- Every page is its own HTML file; edit the copy directly in it. Each product's text is in `work/<project>/index.html`.
+- The sidebar is repeated in every page. If you add or rename a page, update the `<aside class="sb">` block in each file.
+- The products list is the `<ul class="pi">` in `products/index.html`; `data-preview` is the image that floats under the cursor.
+- Shared styles (sidebar, buttons, project-page layout, products list) are in `styles.css`.
+- To swap a hero photo, replace the file in `assets/photos/` (keep the name) or change the `src` on the `.hero-slide` images in `index.html`; captions are in `site.js`.
 - The photo collage positions are the `grid-column` / `grid-row` values on each print in `photographs/index.html`.
