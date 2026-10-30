@@ -42,6 +42,8 @@ a{color:inherit}
 .hero-bar.is-active>span>i{animation:rw-fill 6s linear forwards}
 html{scroll-behavior:smooth}
 @media (max-width: 1060px){.pg-frame{display:none}}
+@keyframes pg-bob{50%{transform:translateY(6px)}}
+@media (prefers-reduced-motion: no-preference){.pg-arrow{animation:pg-bob 1.6s ease-in-out infinite}}
 </style>
 </head>
 <body>
@@ -155,11 +157,11 @@ html{scroll-behavior:smooth}
 </a>
 <a class="rw-fan" href="#p3" style="--r: 0deg; --y: 0px; flex: none; width: 220px; margin: 0 -26px; background: #FFFFFF; border-radius: 18px; padding: 10px 10px 16px; box-shadow: 0 18px 40px -22px rgba(30,35,31,0.45); text-decoration: none; position: relative; z-index: 3">
 <img src="assets/video/auto-sfx-poster.jpg" alt="" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; display: block">
-<span style="display: block; margin: 12px 6px 0; font-weight: 500">Auto sound effects</span><span style="display: block; margin: 0 6px; font-size: 13px; color: #626A63">Shipped in a month</span>
+<span style="display: block; margin: 12px 6px 0; font-weight: 500">Auto sound effects</span><span style="display: block; margin: 0 6px; font-size: 13px; color: #626A63">5× weekly active users</span>
 </a>
 <a class="rw-fan" href="#p4" style="--r: 4deg; --y: 8px; flex: none; width: 220px; margin: 0 -26px; background: #FFFFFF; border-radius: 18px; padding: 10px 10px 16px; box-shadow: 0 18px 40px -22px rgba(30,35,31,0.45); text-decoration: none; position: relative; z-index: 2">
 <img src="assets/video/eye-contact-poster.jpg" alt="" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; display: block">
-<span style="display: block; margin: 12px 6px 0; font-weight: 500">Eye contact</span><span style="display: block; margin: 0 6px; font-size: 13px; color: #626A63">AI editing</span>
+<span style="display: block; margin: 12px 6px 0; font-weight: 500">Eye contact</span><span style="display: block; margin: 0 6px; font-size: 13px; color: #626A63">~2K weekly active users</span>
 </a>
 <a class="rw-fan" href="#p5" style="--r: 8deg; --y: 26px; flex: none; width: 220px; margin: 0 -26px; background: #FFFFFF; border-radius: 18px; padding: 10px 10px 16px; box-shadow: 0 18px 40px -22px rgba(30,35,31,0.45); text-decoration: none; position: relative; z-index: 1">
 <span style="width: 100%; aspect-ratio: 4 / 3; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #E6EEF6"><span style="padding: 8px 14px; border-radius: 18px 18px 18px 6px; background: #0B84FF; color: #FFFFFF; font-size: 14px">Reply YES to start</span></span>
@@ -173,7 +175,7 @@ html{scroll-behavior:smooth}
 <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
 <p style="margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.2em; color: #5F7A66">01 · OPUSCLIP</p>
 <h3 style="margin: 0; font-size: clamp(30px, 3vw, 40px); line-height: 1.05; font-weight: 300; letter-spacing: -0.03em">Agent Opus</h3>
-<p style="margin: 0; color: #4E554F">A text-to-video agent: describe an idea and it writes the script, plans the scenes and edits a finished story video. I wrote the PRD from user interviews, prototyped the end-to-end UX and ran the alpha co-creator program.</p>
+<p style="margin: 0; color: #4E554F">A text-to-video agent: describe an idea and it writes the script, plans the scenes and edits a complete video. I wrote the PRD from user interviews, prototyped the end-to-end UX and ran alpha testing with the first batch of seed users.</p>
 <div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">PM, 0→1</span><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">~1,000 active beta users</span></div>
 <div style="display: flex; flex-wrap: wrap; gap: 10px"><a href="#playground" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; background: #1E231F; color: #FFFFFF; text-decoration: none; font-weight: 500">Play the prototype</a><a href="https://agent.opus.pro" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; border: 1px solid #1E231F; text-decoration: none; font-weight: 500">agent.opus.pro ↗</a></div>
 </div>
@@ -196,7 +198,7 @@ html{scroll-behavior:smooth}
 <p style="margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.2em; color: #5F7A66">03 · OPUSCLIP</p>
 <h3 style="margin: 0; font-size: clamp(30px, 3vw, 40px); line-height: 1.05; font-weight: 300; letter-spacing: -0.03em">Auto sound effects</h3>
 <p style="margin: 0; color: #4E554F">The first version generated audio from scratch, and retention was low. I rebuilt it so an LLM finds the moments that need a sound and places one from a curated library of viral social audio — PM end to end with one engineer and an AI artist.</p>
-<div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">PM, end to end</span><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">Shipped in about a month</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">PM, end to end</span><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">Shipped in about a month</span><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">Weekly active users ~1K → ~5K</span></div>
 <a href="https://clip.opus.pro" target="_blank" rel="noopener" style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; background: #1E231F; color: #FFFFFF; text-decoration: none; font-weight: 500">Try in OpusClip ↗</a>
 </div>
 <video src="assets/video/auto-sfx.mp4" poster="assets/video/auto-sfx-poster.jpg" autoplay="" muted="" loop="" playsinline="" controls="" preload="metadata" aria-label="Captioned walkthrough of one-click auto sound effects" style="flex: 999 1 520px; min-width: 0; width: 100%; display: block; border-radius: 16px; background: #111111"></video>
@@ -206,8 +208,8 @@ html{scroll-behavior:smooth}
 <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
 <p style="margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.2em; color: #5F7A66">04 · OPUSCLIP</p>
 <h3 style="margin: 0; font-size: clamp(30px, 3vw, 40px); line-height: 1.05; font-weight: 300; letter-spacing: -0.03em">Eye contact correction</h3>
-<p style="margin: 0; color: #4E554F">Every portrait photographer knows the shot lives in the eyes. Creators reading a script lose that connection; one toggle redirects their gaze back to the lens. [What you owned and the key call you made]</p>
-<div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">[Your role]</span><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">[Outcome]</span></div>
+<p style="margin: 0; color: #4E554F">Most OpusClip videos center on a speaker, and we noticed their gaze often drifts away from the camera. Eye contact correction redirects the speaker's gaze back to the camera in a single click.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">~2,000 weekly active users</span></div>
 <a href="https://clip.opus.pro" target="_blank" rel="noopener" style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; background: #1E231F; color: #FFFFFF; text-decoration: none; font-weight: 500">Try in OpusClip ↗</a>
 </div>
 <video src="assets/video/eye-contact.mp4" poster="assets/video/eye-contact-poster.jpg" autoplay="" muted="" loop="" playsinline="" controls="" preload="metadata" aria-label="Walkthrough of eye contact correction in the OpusClip editor" style="flex: 999 1 520px; min-width: 0; width: 100%; display: block; border-radius: 16px; background: #111111"></video>
@@ -217,7 +219,7 @@ html{scroll-behavior:smooth}
 <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
 <p style="margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.2em; color: #5F7A66">05 · SIDE PROJECT · MAPIER LABS</p>
 <h3 style="margin: 0; font-size: clamp(30px, 3vw, 40px); line-height: 1.05; font-weight: 300; letter-spacing: -0.03em">Mapier Reply</h3>
-<p style="margin: 0; color: #4E554F">Customer research over iMessage — no logins, no forms. I wrote the PRD and architect the product end to end with the founder. The prototype covers targeting, an AI survey builder, billing and AI-summarized results.</p>
+<p style="margin: 0; color: #4E554F">A customer research pipeline over iMessage, with no external logins or forms. I wrote the PRD and architected the product end to end with the founding engineer. The prototype covers an AI survey builder, automated billing based on respondent engagement, and AI-summarized results.</p>
 <div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">PRD + product architecture</span></div>
 <div style="display: flex; flex-wrap: wrap; gap: 10px">
 <a href="mapier/" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; background: #1E231F; color: #FFFFFF; text-decoration: none; font-weight: 500">Try the prototype ↗</a>
@@ -246,10 +248,10 @@ html{scroll-behavior:smooth}
 <div style="max-width: 1360px; margin: 0 auto; padding: 120px clamp(20px, 4vw, 56px)">
 <div class="rw-reveal" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 48px">
 <p style="margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #626A63">Interactive prototype</p>
-<h2 style="margin: 0; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.08; font-weight: 300; letter-spacing: -0.035em">Play with Agent Opus</h2>
-<p style="margin: 0; max-width: 620px; color: #626A63">A clickable prototype of the agent workflow I designed. Watch the last clip render, jump between steps, and click any reference or clip to tell the agent exactly what to change.</p>
+<h2 style="margin: 0; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.08; font-weight: 300; letter-spacing: -0.035em">Generate videos from a single prompt with Agent Opus</h2>
+<a href="#pg-demo" style="display: inline-flex; flex-direction: column; align-items: center; gap: 6px; color: #626A63; text-decoration: none">Try the interactive demo below<svg class="pg-arrow" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M6 13l6 6 6-6"></path></svg></a>
 </div>
-<div class="pg-frame">
+<div class="pg-frame" id="pg-demo">
 <iframe src="agent-opus/" title="Agent Opus interactive prototype" loading="lazy" style="display: block; width: 100%; height: 890px; border: 0; background: transparent"></iframe>
 </div>
 <div style="display: flex; justify-content: center; margin-top: 24px">
@@ -260,14 +262,14 @@ html{scroll-behavior:smooth}
 
 <section class="rw-band" aria-label="Photograph of a mosque at sunset" style="min-height: 600px; display: flex; align-items: center; justify-content: center; padding: 80px clamp(20px, 4vw, 56px); box-sizing: border-box; position: relative">
 <span aria-hidden="true" style="position: absolute; inset: 0; background: rgba(14,10,6,0.3); display: block"></span>
-<p style="position: relative; margin: 0; max-width: 940px; text-align: center; color: #FFFFFF; font-size: clamp(32px, 4.4vw, 60px); line-height: 1.1; font-weight: 300; letter-spacing: -0.035em; text-shadow: 0 2px 24px rgba(0,0,0,0.35)">Good products, like good photographs, are mostly what you leave out.</p>
+<p style="position: relative; margin: 0; max-width: 940px; text-align: center; color: #FFFFFF; font-size: clamp(32px, 4.4vw, 60px); line-height: 1.1; font-weight: 300; letter-spacing: -0.035em; text-shadow: 0 2px 24px rgba(0,0,0,0.35)">When I'm not busy building, I love photographing the world around me.</p>
 </section>
 
 <section id="photographs" style="max-width: 1240px; margin: 0 auto; padding: 130px clamp(20px, 4vw, 56px) 120px">
 <div class="rw-reveal" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 72px">
 <p style="margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #626A63">Freelance photography</p>
-<h2 style="margin: 0; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.08; font-weight: 300; letter-spacing: -0.035em">Photographs</h2>
-<p style="margin: 0; max-width: 560px; color: #626A63">Street, travel and landscape. Available for portraits and events around the Bay Area.</p>
+<h2 style="margin: 0; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.08; font-weight: 300; letter-spacing: -0.035em">A window into my life</h2>
+<p style="margin: 0; max-width: 560px; color: #626A63">Moments from my travels and everyday life. I also shoot portraits and events around the Bay Area.</p>
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 6px">
 <a href="mailto:rebeccawuruochun@gmail.com?subject=Photo%20shoot" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; background: #1E231F; color: #FFFFFF; text-decoration: none; font-weight: 500">Book a shoot</a>
 <a href="#" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; border: 1px solid #1E231F; text-decoration: none; font-weight: 500">[Instagram]</a>
