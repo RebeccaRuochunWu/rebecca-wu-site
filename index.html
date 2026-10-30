@@ -41,6 +41,7 @@ a{color:inherit}
 .hero-bar.is-past>span>i{width:100%}
 .hero-bar.is-active>span>i{animation:rw-fill 6s linear forwards}
 html{scroll-behavior:smooth}
+@media (max-width: 1060px){.pg-frame{display:none}}
 </style>
 </head>
 <body>
@@ -174,7 +175,7 @@ html{scroll-behavior:smooth}
 <h3 style="margin: 0; font-size: clamp(30px, 3vw, 40px); line-height: 1.05; font-weight: 300; letter-spacing: -0.03em">Agent Opus</h3>
 <p style="margin: 0; color: #4E554F">A text-to-video agent: describe an idea and it writes the script, plans the scenes and edits a finished story video. I wrote the PRD from user interviews, prototyped the end-to-end UX and ran the alpha co-creator program.</p>
 <div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">PM, 0→1</span><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #EEF2EC; color: #3F5546">~1,000 active beta users</span></div>
-<a href="https://agent.opus.pro" target="_blank" rel="noopener" style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; background: #1E231F; color: #FFFFFF; text-decoration: none; font-weight: 500">Try Agent Opus ↗</a>
+<div style="display: flex; flex-wrap: wrap; gap: 10px"><a href="#playground" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; background: #1E231F; color: #FFFFFF; text-decoration: none; font-weight: 500">Play the prototype</a><a href="https://agent.opus.pro" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; border: 1px solid #1E231F; text-decoration: none; font-weight: 500">agent.opus.pro ↗</a></div>
 </div>
 <video src="assets/video/agent-opus.mp4" poster="assets/video/agent-opus-poster.jpg" autoplay="" muted="" loop="" playsinline="" controls="" preload="metadata" aria-label="Screen recording of the Agent Opus create screen" style="flex: 999 1 520px; min-width: 0; width: 100%; display: block; border-radius: 16px; background: #111111"></video>
 </article>
@@ -238,6 +239,22 @@ html{scroll-behavior:smooth}
 </a>
 </article>
 
+</div>
+</section>
+
+<section id="playground" style="background: #F2F3EE">
+<div style="max-width: 1360px; margin: 0 auto; padding: 120px clamp(20px, 4vw, 56px)">
+<div class="rw-reveal" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 48px">
+<p style="margin: 0; font-size: 12px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #626A63">Interactive prototype</p>
+<h2 style="margin: 0; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.08; font-weight: 300; letter-spacing: -0.035em">Play with Agent Opus</h2>
+<p style="margin: 0; max-width: 620px; color: #626A63">A clickable prototype of the agent workflow I designed. Watch the last clip render, jump between steps, and click any reference or clip to tell the agent exactly what to change.</p>
+</div>
+<div class="pg-frame">
+<iframe src="agent-opus/" title="Agent Opus interactive prototype" loading="lazy" style="display: block; width: 100%; height: 890px; border: 0; background: transparent"></iframe>
+</div>
+<div style="display: flex; justify-content: center; margin-top: 24px">
+<a href="agent-opus/" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; min-height: 46px; padding: 0 22px; border-radius: 999px; border: 1px solid #1E231F; text-decoration: none; font-weight: 500">Open full screen ↗</a>
+</div>
 </div>
 </section>
 
