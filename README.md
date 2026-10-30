@@ -5,12 +5,16 @@ Personal site for Rebecca Wu — product builder, tech-savvy hacker and freelanc
 A plain static site: no framework, no build step. Open `index.html` in a browser to preview it.
 
 ```
-index.html          the whole home page (HTML + CSS + a little JS for the hero slideshow)
+index.html             home: hero, about, how I work, products index, photo teaser, contact
+styles.css             shared styles for every page
+work/<project>/        one page per product (agent-opus, eval-platform, auto-sfx, eye-contact, mapier-reply)
+photographs/           photo collage page
+agent-opus/            Agent Opus interactive prototype (embedded on work/agent-opus/)
+mapier/                Mapier Reply interactive prototype
+assets/photos/         photographs (resized for the web, location metadata removed)
+assets/video/          product demo clips + poster frames
+assets/previews/       preview images for products without a video poster
 favicon.svg
-assets/photos/      photographs (resized for the web, location metadata removed)
-assets/video/       product demo clips + poster frames
-mapier/index.html   Mapier Reply clickable prototype (linked from the Products section)
-agent-opus/index.html  Agent Opus interactive prototype (embedded in the #playground section)
 ```
 
 ## Preview locally
@@ -49,11 +53,12 @@ git push -u origin main
 
 Search `index.html` for `[` to find placeholders:
 
-- Eye contact correction: your role, the key call you made, the outcome
 - Instagram link (points to `#` for now)
 
 ## Editing tips
 
-- Copy lives directly in `index.html`; each section is marked by its `id` (`about`, `approach`, `products`, `photographs`, `contact`).
+- Copy lives directly in the HTML. Home sections are marked by `id` (`about`, `approach`, `products`, `contact`); each product's text is in `work/<project>/index.html`.
+- The products list on the home page is the `<ul class="pi">` in `index.html`; `data-preview` is the image that floats under the cursor.
+- Shared styles (buttons, project-page layout, products list) are in `styles.css`.
 - To swap a hero photo, replace the file in `assets/photos/` (keep the name) or change the `src` on the `.hero-slide` images; captions are in the script at the bottom.
-- The photo collage positions are the `grid-column` / `grid-row` values on each print in `#photographs`.
+- The photo collage positions are the `grid-column` / `grid-row` values on each print in `photographs/index.html`.
